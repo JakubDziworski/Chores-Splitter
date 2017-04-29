@@ -7,3 +7,4 @@ This app let's you split boring house chores between roommates in a fair way.
 sbt test
 
 ## Frontend (android TODO)
+git p

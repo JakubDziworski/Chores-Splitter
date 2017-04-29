@@ -12,7 +12,9 @@ trait UsersRoutes extends JsonSupport {
   val usersService: UsersService
 
   val usersRoutes = pathPrefix("users") {
-    (post & entity(as[AddUserDto])) { user =>
+    get {
+      complete(OK,usersService.getUsers)
+    } ~ (post & entity(as[AddUserDto])) { user =>
       complete(Created,usersService.addUser(user))
     }
   }

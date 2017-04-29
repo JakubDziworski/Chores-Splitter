@@ -26,7 +26,8 @@ val akkaDeps = Seq(
 val testDeps = Seq(
   "org.scalatest" %% "scalatest" % scalaTestV % "test",
   "com.typesafe.akka" %% "akka-stream-testkit" % akkaV % "test",
-  "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test"
+  "com.typesafe.akka" %% "akka-http-testkit" % akkaV % "test",
+  "org.scalamock" %% "scalamock-scalatest-support" % "3.5.0" % Test
 )
 
 val loggingDeps = Seq(

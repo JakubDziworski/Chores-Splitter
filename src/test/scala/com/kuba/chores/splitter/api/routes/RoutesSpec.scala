@@ -1,6 +1,8 @@
 package com.kuba.chores.splitter.api.routes
 
-import akka.http.scaladsl.model.StatusCodes
+import java.time.{Clock, Instant}
+
+import akka.http.scaladsl.model.{DateTime, StatusCodes}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import com.kuba.chords.splitter.AppConfig
 import com.kuba.chords.splitter.api.routes.dto.UserDtos._
@@ -10,27 +12,31 @@ import com.kuba.chords.splitter.api.routes.dto.JsonSupport
 import com.kuba.chords.splitter.api.routes.Routes
 import com.kuba.chords.splitter.service.{ChoresService, TasksService, UsersService}
 import com.kuba.chores.splitter.util.DbSetUp
-import com.kuba.dziworski.chords.splitter.slick.Tables
+import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpec}
 
-class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteTest with JsonSupport with AppConfig with BeforeAndAfterEach with DbSetUp {
+class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteTest with JsonSupport with AppConfig with BeforeAndAfterEach with DbSetUp with MockFactory {
   val ApiPrefix = "/api/v1"
-  val chores = Tables.Chores
 
-  override val choresService = new ChoresService(db)
+  val clockMock = mock[Clock]
+
+  override val choresService = new ChoresService(db,clockMock)
   override val usersService = new UsersService(db)
-  override val tasksService = new TasksService(db)
+  override val tasksService = new TasksService(db,clockMock)
 
   "POST /chores" should {
     "Add new Chore" in {
+      setTime(100)
       Post(s"$ApiPrefix/chores", AddChoreDto("dust", 10, Some(3))) ~> routes ~> check {
         responseAs[String] shouldBe """{"choreId":1}"""
+        status shouldBe StatusCodes.Created
       }
     }
   }
 
   "GET /chores" should {
     "return list of chores" in {
+      setTime(100)
       addChore("dust", 10, Some(5))
       Get(s"$ApiPrefix/chores") ~> routes ~> check {
         responseAs[GetChoresDto] shouldBe GetChoresDto(
@@ -40,16 +46,60 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
     }
   }
 
-
-  "POST /chores/1/tasks" should {
-    "add task" in {
+  "POST /tasks" should {
+    "return Created and task id" in {
+      setTime(100)
       val choreId = addChore()
       val userId = addUser()
       val addTask = AddTaskDto(choreId, userId)
-      Post(s"$ApiPrefix/chores/1/tasks", addTask) ~> routes ~> check {
-
+      Post(s"$ApiPrefix/tasks", addTask) ~> routes ~> check {
+        responseAs[TaskId] shouldBe TaskId(1)
+        status shouldBe StatusCodes.Created
       }
     }
+  }
+
+  "PUT /chores/1" should {
+    "edit chore returns Created with new chore id" in {
+      setTime(100)
+      val dustId = addChore("dust",5,Some(3))
+      val dto = AddChoreDto("dust harder",7,Some(2))
+      Put(s"$ApiPrefix/chores/1",dto) ~> routes ~> check {
+        responseAs[ChoreId] shouldBe ChoreId(2)
+      }
+    }
+  }
+
+  "GET /tasks/user/1" should {
+    "return users' tasks" in {
+      setTime(100)
+      val userId = addUser("andrew","andrew@gmail.com")
+      val choreId = addChore("sweep",5,Some(3))
+      val taskId = addTask(userId,choreId)
+      Get(s"$ApiPrefix/tasks/user/${taskId.taskId}") ~> routes ~> check {
+        responseAs[GetTasksDto] shouldBe GetTasksDto(List(
+          GetTaskDto(taskId.taskId,choreId.choreId,userId.userId,100,completed = false))
+        )
+      }
+    }
+  }
+
+  "GET /users" should {
+    "return users" in {
+      setTime(100)
+      addUser("john","john@gmail.com")
+      addUser("stefan","stefan@gmail.com")
+      Get(s"$ApiPrefix/users") ~> routes ~> check {
+        responseAs[GetUsersDto] shouldBe GetUsersDto(List(
+          GetUserDto(1, "john", "john@gmail.com"),
+          GetUserDto(2, "stefan", "stefan@gmail.com")
+        ))
+      }
+    }
+  }
+
+  private def setTime(time: Long): Any = {
+    (clockMock.instant _).expects().anyNumberOfTimes.returning(Instant.ofEpochMilli(time))
   }
 
   def addChore(name: String = "dust", points: Int = 10, interval: Option[Int] = Some(5)): ChoreId = {
@@ -61,6 +111,12 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
   def addUser(name: String = "mark", email: String = "mark@gmail.com"): UserId = {
     Post(s"$ApiPrefix/users", AddUserDto(name, email)) ~> routes ~> check {
       responseAs[UserId]
+    }
+  }
+
+  def addTask(userId:UserId,choreId:ChoreId): TaskId = {
+    Post(s"$ApiPrefix/tasks",AddTaskDto(choreId,userId)) ~> routes ~> check {
+      responseAs[TaskId]
     }
   }
 
