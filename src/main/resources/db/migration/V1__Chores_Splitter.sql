@@ -23,17 +23,17 @@ CREATE TABLE IF NOT EXISTS tasks
   assigned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
   completed_at TIMESTAMP
 );
-
-INSERT INTO users(name,email) VALUES
-  ('Zbysiu','zbysiu@gmail.com'),
-  ('Mariusz','mariusz@gmail.com');
-
-INSERT INTO chores(created_at,name,points,interval) VALUES
-  (CURRENT_TIMESTAMP(),'kurze',15,5),
-  (CURRENT_TIMESTAMP(),'szafki',25,3);
-
-INSERT INTO tasks(user_id,chore_id,assigned_at,completed_at) VALUES
-  (1,1,CURRENT_TIMESTAMP(),null),
-  (2,2,CURRENT_TIMESTAMP(),CURRENT_TIMESTAMP())
+--
+-- INSERT INTO users(name,email) VALUES
+--   ('Zbysiu','zbysiu@gmail.com'),
+--   ('Mariusz','mariusz@gmail.com');
+--
+-- INSERT INTO chores(created_at,name,points,interval) VALUES
+--   (CURRENT_TIMESTAMP(),'kurze',15,5),
+--   (CURRENT_TIMESTAMP(),'szafki',25,3);
+--
+-- INSERT INTO tasks(user_id,chore_id,assigned_at,completed_at) VALUES
+--   (1,1,CURRENT_TIMESTAMP(),null),
+--   (2,2,CURRENT_TIMESTAMP(),CURRENT_TIMESTAMP())
 
 
