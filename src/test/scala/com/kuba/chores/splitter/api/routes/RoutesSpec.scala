@@ -2,14 +2,14 @@ package com.kuba.chores.splitter.api.routes
 
 import java.time.{Clock, Instant}
 
-import akka.http.scaladsl.model.{DateTime, StatusCodes}
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import com.kuba.chords.splitter.AppConfig
-import com.kuba.chords.splitter.api.routes.dto.UserDtos._
-import com.kuba.chords.splitter.api.routes.dto.TaskDtos._
+import com.kuba.chords.splitter.api.routes.Routes
 import com.kuba.chords.splitter.api.routes.dto.ChoreDtos._
 import com.kuba.chords.splitter.api.routes.dto.JsonSupport
-import com.kuba.chords.splitter.api.routes.Routes
+import com.kuba.chords.splitter.api.routes.dto.TaskDtos._
+import com.kuba.chords.splitter.api.routes.dto.UserDtos._
 import com.kuba.chords.splitter.service.{ChoresService, TasksService, UsersService}
 import com.kuba.chores.splitter.util.DbSetUp
 import org.scalamock.scalatest.MockFactory
