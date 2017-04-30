@@ -13,7 +13,7 @@ trait JsonSupport extends ChoreFormat with TaskFormat with UserFormat
 
 object ChoreDtos {
   case class AddChoreDto(name: String, points: Int, interval: Option[Int])
-  case class EditChoreDto(choreId: ChoreId,name: String, points: Int, interval: Option[Int])
+  case class EditChoreDto(choreId: String,name: String, points: Int, interval: Option[Int])
   case class ChoreId(choreId: Long) extends InputDto
   case class GetChoreDto(id: Long, name: String, points: Int, interval: Option[Int]) extends OutputDto
   case class GetChoresDto(chores: List[GetChoreDto]) extends OutputDto

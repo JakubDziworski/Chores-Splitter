@@ -7,8 +7,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.GET
-import retrofit2.http.Path
+import retrofit2.http.*
 
 
 interface BackendService {
@@ -23,6 +22,12 @@ interface BackendService {
 
     @GET("chores")
     fun getChores() : Flowable<GetChoresDto>
+
+    @POST("chores")
+    fun addChore(@Body addChoreDto: AddChoreDto) : Flowable<ChoreId>
+
+    @PUT("chores/{choreId}")
+    fun editChore(@Path("choreId") choreId:String, @Body editChoreDto: EditChoreDto) : Flowable<ChoreId>
 }
 
 object Backend {
@@ -49,8 +54,11 @@ data class GetUserDto(val id: Long,val  name: String,val  email: String) {
 }
 data class GetUsersDto(val users: List<GetUserDto>)
 
+data class ChoreId(val choreId: Long)
 data class GetChoreDto(val id: Long,val  name: String, val points: Int,val  interval: Int?)
 data class GetChoresDto(val chores: List<GetChoreDto>)
+data class AddChoreDto(val name: String, val points: Int, val interval: Int?)
+data class EditChoreDto(val choreId: String, val name: String, val points: Int, val interval: Int?)
 
 data class GetTaskDto(val id: Long, val chore:GetChoreDto, val user:GetUserDto, val assignedAt: Long, val completed: Boolean)
 data class GetTasksDto(val tasks:List<GetTaskDto>)

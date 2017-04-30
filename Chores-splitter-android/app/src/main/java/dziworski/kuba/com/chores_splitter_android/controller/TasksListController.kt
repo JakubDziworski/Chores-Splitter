@@ -16,21 +16,9 @@ import dziworski.kuba.com.chores_splitter_android.http.GetTaskDto
 import dziworski.kuba.com.chores_splitter_android.http.GetUserDto
 import io.reactivex.rxkotlin.subscribeBy
 
-object BundleBuilder {
-    val USER_ID_KEY = "LALA"
-
-    fun getUserId(bundle:Bundle): Long {
-        return bundle.getLong(USER_ID_KEY)
-    }
-    fun putUserId(value: Long) : Bundle {
-        val bundle = Bundle()
-        bundle.putLong(USER_ID_KEY,value)
-        return bundle
-    }
-}
 class TasksListController : Controller {
 
-    constructor(userId:Long) : this(BundleBuilder.putUserId(userId))
+    constructor(userId:Long) : this(Boundles.putUserId(userId))
     constructor(bundle:Bundle) : super(bundle)
 
     private lateinit var recyclerView: RecyclerView
@@ -40,7 +28,7 @@ class TasksListController : Controller {
         recyclerView = view.findViewById(R.id.tasks_list_recycler_view) as RecyclerView
         recyclerView.setHasFixedSize(true)
         recyclerView.setLayoutManager(LinearLayoutManager(view.context))
-        recyclerView.adapter = TaskItemAdapter(BundleBuilder.getUserId(args),LayoutInflater.from(applicationContext))
+        recyclerView.adapter = TaskItemAdapter(Boundles.getUserId(args),LayoutInflater.from(applicationContext))
         return view
     }
 
@@ -83,6 +71,19 @@ class TasksListController : Controller {
                 pointsText.text = item.chore.points.toString()
                 completedCheckBox.isChecked = item.completed
             }
+        }
+    }
+
+    companion object Boundles {
+        val USER_ID_KEY = "TASK_LIST_USER_ID"
+
+        fun getUserId(bundle:Bundle): Long {
+            return bundle.getLong(USER_ID_KEY)
+        }
+        fun putUserId(value: Long) : Bundle {
+            val bundle = Bundle()
+            bundle.putLong(USER_ID_KEY,value)
+            return bundle
         }
     }
 }
