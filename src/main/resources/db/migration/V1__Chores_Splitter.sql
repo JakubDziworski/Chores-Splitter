@@ -30,16 +30,16 @@ CREATE TABLE IF NOT EXISTS tasks_dispatches
   dispatched_at BIGINT NOT NULL,
 );
 
-INSERT INTO users(name,email) VALUES
-  ('Zbysiu','zbysiu@gmail.com'),
-  ('Mariusz','mariusz@gmail.com');
-
-INSERT INTO chores(created_at,name,points,interval) VALUES
-  (5000000,'kurze',15,5),
-  (5000000,'szafki',25,3);
-
-INSERT INTO tasks(user_id,chore_id,assigned_at,completed_at) VALUES
-  (1,1,5000000,null),
-  (2,2,5000000,50001000)
+-- INSERT INTO users(name,email) VALUES
+--   ('Zbysiu','zbysiu@gmail.com'),
+--   ('Mariusz','mariusz@gmail.com');
+--
+-- INSERT INTO chores(created_at,name,points,interval) VALUES
+--   (5000000,'kurze',15,5),
+--   (5000000,'szafki',25,3);
+--
+-- INSERT INTO tasks(user_id,chore_id,assigned_at,completed_at) VALUES
+--   (1,1,5000000,null),
+--   (2,2,5000000,50001000)
 
 
