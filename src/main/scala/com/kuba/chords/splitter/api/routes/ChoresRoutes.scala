@@ -12,12 +12,14 @@ trait ChoresRoutes extends TaskRoutes with JsonSupport {
   val choresService: ChoresService
 
   val choresRoutes = pathPrefix("chores") {
-    (post & entity(as[AddChoreDto])) { chore =>
-      val id = choresService.addChore(chore)
-      complete(Created, id)
-    } ~ get {
-      val list = choresService.getChores
-      complete(OK, list)
+    pathEndOrSingleSlash {
+      (post & entity(as[AddChoreDto])) { chore =>
+        val id = choresService.addChore(chore)
+        complete(Created, id)
+      } ~ get {
+        val list = choresService.getChores
+        complete(OK, list)
+      }
     } ~ path(LongNumber) { choreId =>
       get {
         val chore = choresService.getChore(ChoreId(choreId))

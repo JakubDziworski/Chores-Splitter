@@ -101,8 +101,10 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
     "return users' tasks" in {
       setTime(100)
       val andrew = addUser("andrew","andrew@gmail.com")
+      val john = addUser("john","john@gmail.com")
       val sweep = addChore("sweep",5,Some(3))
       val andrewSweepTask = addTask(andrew,sweep)
+      val johnSweepTask = addTask(john,sweep)
       Get(s"$ApiPrefix/tasks/user/${andrewSweepTask.taskId}") ~> routes ~> check {
         responseAs[GetTasksDto] shouldBe GetTasksDto(List(
           GetTaskDto(
