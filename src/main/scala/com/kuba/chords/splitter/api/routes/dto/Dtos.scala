@@ -4,6 +4,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import com.kuba.chords.splitter.api.routes.dto.TaskDtos._
 import com.kuba.chords.splitter.api.routes.dto.ChoreDtos._
 import com.kuba.chords.splitter.api.routes.dto.UserDtos._
+import com.kuba.dziworski.chords.splitter.slick.Tables.{ChoresRow, TasksRow, UsersRow}
 import spray.json.DefaultJsonProtocol
 
 trait OutputDto
@@ -47,7 +48,7 @@ object UserDtos {
 object TaskDtos {
   case class TaskId(taskId:Long) extends InputDto
   case class AddTaskDto(choreId: ChoreId, userId: UserId)
-  case class GetTaskDto(id: Long, choreId: Long, userId: Long, assignedAt: Long, completed: Boolean)
+  case class GetTaskDto(id: Long, chore:GetChoreDto, user:GetUserDto, assignedAt: Long, completed: Boolean)
   case class GetTasksDto(tasks:List[GetTaskDto])
 
   trait TaskFormat extends SprayJsonSupport with DefaultJsonProtocol with ChoreFormat with UserFormat {
@@ -57,3 +58,30 @@ object TaskDtos {
     implicit lazy val getTasksDtoFormat = jsonFormat1(GetTasksDto)
   }
 }
+
+object RowConversions {
+  implicit class UserConverter(userRow: UsersRow) {
+    def toDto : GetUserDto = {
+      GetUserDto(userRow.id,userRow.name,userRow.email)
+    }
+  }
+
+  implicit class ChoreConverter(choreRow: ChoresRow) {
+    def toDto : GetChoreDto = {
+      GetChoreDto(choreRow.choreId,choreRow.name,choreRow.points,choreRow.interval)
+    }
+  }
+
+  implicit class TaskConverter(taskRow: TasksRow) {
+    def toDto(choreRow: ChoresRow,userRow: UsersRow): GetTaskDto = {
+      GetTaskDto(
+        taskRow.id,
+        choreRow.toDto,
+        userRow.toDto,
+        taskRow.assignedAt.getTime,
+        taskRow.completedAt.isDefined
+      )
+    }
+  }
+}
+

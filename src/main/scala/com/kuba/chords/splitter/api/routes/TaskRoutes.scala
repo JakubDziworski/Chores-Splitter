@@ -12,7 +12,9 @@ trait TaskRoutes extends JsonSupport {
   val tasksService: TasksService
 
   val tasksRoutes = pathPrefix("tasks") {
-    (post & entity(as[AddTaskDto])) { taskDto =>
+    get {
+      complete(OK,tasksService.getTasks())
+    } ~ (post & entity(as[AddTaskDto])) { taskDto =>
       val taskId = tasksService.addTask(taskDto)
       complete(Created, taskId)
     } ~ path("user" / LongNumber) { userId =>

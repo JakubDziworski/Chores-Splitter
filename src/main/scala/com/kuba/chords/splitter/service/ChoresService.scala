@@ -5,7 +5,7 @@ import java.time.Clock
 
 import com.kuba.chords.splitter.api.routes.dto.ChoreDtos._
 import com.kuba.dziworski.chords.splitter.slick.Tables
-import com.kuba.dziworski.chords.splitter.slick.Tables.ChoresRow
+import com.kuba.chords.splitter.api.routes.dto.RowConversions._
 import slick.jdbc.H2Profile.api._
 
 import scala.concurrent.ExecutionContext.Implicits._
@@ -19,10 +19,6 @@ class ChoresService(db: Database,clock: Clock = Clock.systemUTC()) {
   def now(): Timestamp = {
     Timestamp.from(clock.instant())
   }
-  private def convertToDto(choresRow: ChoresRow) = {
-    GetChoreDto(choresRow.choreId,choresRow.name,choresRow.points,choresRow.interval)
-  }
-
   def addChore(addChoreDto: AddChoreDto): Future[ChoreId] = {
     val columns = chores.map(c => (c.name,c.points,c.createdAt, c.interval))
     val row = (addChoreDto.name, addChoreDto.points,now(),addChoreDto.interval)
@@ -54,11 +50,11 @@ class ChoresService(db: Database,clock: Clock = Clock.systemUTC()) {
 
   def getChores: Future[GetChoresDto] = {
     val action = chores.distinctOn(ch => ch.srcChoreId.getOrElse(ch.choreId)).result
-    db.run(action).map(_.map(convertToDto).toList).map(GetChoresDto)
+    db.run(action).map(_.map(_.toDto).toList).map(GetChoresDto)
   }
 
   def getChore(id: ChoreId): Future[GetChoreDto] = {
     val action = chores.filter(_.choreId === id.choreId).result.head
-    db.run(action).map(convertToDto)
+    db.run(action).map(_.toDto)
   }
 }

@@ -70,15 +70,47 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
     }
   }
 
+  "GET /tasks" should {
+    "return all tasks" in {
+      setTime(100)
+      val mark = addUser("mark","mark@gmail.com")
+      val andrew = addUser("andrew","andrew@gmail.com")
+      val sweep = addChore("sweep",5,Some(3))
+      val markSweepTask = addTask(mark,sweep)
+      val andrewSweepTask = addTask(andrew,sweep)
+      Get(s"$ApiPrefix/tasks") ~> routes ~> check {
+        responseAs[GetTasksDto] shouldBe GetTasksDto(List(
+          GetTaskDto(
+            markSweepTask.taskId,
+            GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
+            GetUserDto(mark.userId, "mark", "mark@gmail.com"),
+            100,
+            completed = false),
+          GetTaskDto(
+            andrewSweepTask.taskId,
+            GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
+            GetUserDto(andrew.userId, "andrew", "andrew@gmail.com"),
+            100,
+            completed = false)
+        ))
+      }
+    }
+  }
+
   "GET /tasks/user/1" should {
     "return users' tasks" in {
       setTime(100)
-      val userId = addUser("andrew","andrew@gmail.com")
-      val choreId = addChore("sweep",5,Some(3))
-      val taskId = addTask(userId,choreId)
-      Get(s"$ApiPrefix/tasks/user/${taskId.taskId}") ~> routes ~> check {
+      val andrew = addUser("andrew","andrew@gmail.com")
+      val sweep = addChore("sweep",5,Some(3))
+      val andrewSweepTask = addTask(andrew,sweep)
+      Get(s"$ApiPrefix/tasks/user/${andrewSweepTask.taskId}") ~> routes ~> check {
         responseAs[GetTasksDto] shouldBe GetTasksDto(List(
-          GetTaskDto(taskId.taskId,choreId.choreId,userId.userId,100,completed = false))
+          GetTaskDto(
+            andrewSweepTask.taskId,
+            GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
+            GetUserDto(andrew.userId, "andrew", "andrew@gmail.com"),
+            100,
+            completed = false))
         )
       }
     }

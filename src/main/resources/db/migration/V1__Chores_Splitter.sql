@@ -35,5 +35,5 @@ CREATE TABLE IF NOT EXISTS tasks
 -- INSERT INTO tasks(user_id,chore_id,assigned_at,completed_at) VALUES
 --   (1,1,CURRENT_TIMESTAMP(),null),
 --   (2,2,CURRENT_TIMESTAMP(),CURRENT_TIMESTAMP())
-
-
+--
+--

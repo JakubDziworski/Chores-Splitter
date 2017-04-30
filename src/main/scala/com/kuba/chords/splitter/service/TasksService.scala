@@ -6,9 +6,9 @@ import java.time.{Clock, Instant}
 import com.kuba.chords.splitter.api.routes.dto.TaskDtos.{AddTaskDto, GetTaskDto, GetTasksDto, TaskId}
 import com.kuba.chords.splitter.api.routes.dto.UserDtos.UserId
 import com.kuba.dziworski.chords.splitter.slick.Tables
-import com.kuba.dziworski.chords.splitter.slick.Tables.TasksRow
+import com.kuba.dziworski.chords.splitter.slick.Tables.{ChoresRow, TasksRow, UsersRow}
 import slick.jdbc.H2Profile.api._
-
+import com.kuba.chords.splitter.api.routes.dto.RowConversions._
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
@@ -16,16 +16,8 @@ import scala.concurrent.Future
 class TasksService(db: Database,clock:Clock = Clock.systemUTC) {
   private val AutoInc = 0
   val tasks = Tables.Tasks
-
-  def convert(tasksRow: TasksRow) = {
-    GetTaskDto(
-      tasksRow.id,
-      tasksRow.choreId,
-      tasksRow.userId,
-      tasksRow.assignedAt.getTime,
-      tasksRow.completedAt.isDefined
-    )
-  }
+  val chores = Tables.Chores
+  val users = Tables.Users
 
   def addTask(dto:AddTaskDto) : Future[TaskId] = {
     val now  = Timestamp.from(Instant.now(clock))
@@ -35,7 +27,24 @@ class TasksService(db: Database,clock:Clock = Clock.systemUTC) {
   }
 
   def getTasksForUser(userId:UserId): Future[GetTasksDto] = {
-    val action = tasks.filter(_.userId === userId.userId).result
-    db.run(action).map(_.map(convert).toList).map(GetTasksDto)
+    val query = for {
+      ch <- chores
+      t <- tasks if t.choreId === ch.choreId
+      u <- users.filter(_.id === userId.userId) if t.userId === u.id
+    } yield (ch,t,u)
+    db.run(query.result)
+      .map(_.map{case (chRow,tRow,uRow) => tRow.toDto(chRow,uRow)}.toList)
+      .map(GetTasksDto)
+  }
+
+  def getTasks() : Future[GetTasksDto] = {
+    val query = for {
+      ch <- chores
+      t <- tasks if t.choreId === ch.choreId
+      u <- users if t.userId === u.id
+    } yield (ch,t,u)
+    db.run(query.result)
+      .map(_.map{case (chRow,tRow,uRow) => tRow.toDto(chRow,uRow)}.toList)
+      .map(GetTasksDto)
   }
 }
