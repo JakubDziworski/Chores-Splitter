@@ -16,8 +16,8 @@ class ChoresService(db: Database,clock: Clock = Clock.systemUTC()) {
   private val AutoInc = 0
   val chores = Tables.Chores
 
-  def now(): Timestamp = {
-    Timestamp.from(clock.instant())
+  def now(): Long = {
+    Timestamp.from(clock.instant()).getTime
   }
   def addChore(addChoreDto: AddChoreDto): Future[ChoreId] = {
     val columns = chores.map(c => (c.name,c.points,c.createdAt, c.interval))

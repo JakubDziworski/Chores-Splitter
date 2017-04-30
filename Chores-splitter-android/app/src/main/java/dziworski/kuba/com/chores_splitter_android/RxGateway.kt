@@ -46,7 +46,9 @@ object RxGateway {
                 .subscribe{choresChanged.onNext(Unit)}
     }
 
-    fun addTask() {
-        tasksChanged.onNext(Unit)
+    fun addTask(task: AddTaskDto) {
+        backend.addTask(task)
+                .subscribeOn(Schedulers.io())
+                .subscribe{tasksChanged.onNext(Unit)}
     }
 }

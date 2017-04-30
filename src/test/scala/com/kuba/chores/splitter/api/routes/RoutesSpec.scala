@@ -24,6 +24,16 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
   override val usersService = new UsersService(db)
   override val tasksService = new TasksService(db,clockMock)
 
+  "dupa" should {
+    "fds" in {
+      setTime(50001024)
+      println(tasksService.getUsersPoints())
+      println(tasksService.getChoresAfterInterval())
+      println(tasksService.getLastTaskDispatch())
+      println(tasksService.getLastTaskDispatch())
+    }
+  }
+
   "POST /chores" should {
     "Add new Chore" in {
       setTime(100)

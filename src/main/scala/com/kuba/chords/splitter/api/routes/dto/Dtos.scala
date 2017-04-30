@@ -78,10 +78,13 @@ object RowConversions {
         taskRow.id,
         choreRow.toDto,
         userRow.toDto,
-        taskRow.assignedAt.getTime,
+        taskRow.assignedAt,
         taskRow.completedAt.isDefined
       )
     }
   }
 }
+
+case class UserPoint(userId:UserId,points:Int)
+
 

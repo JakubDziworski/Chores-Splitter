@@ -10,6 +10,11 @@ object Main extends AppLoader {
     val port = appConfig.serverPort
     val bindingFuture = Http().bindAndHandle(routes.routes, host, port)
     println(s"Server online at http://$host:$port/\nPress RETURN to stop...")
+    import scala.concurrent.duration._
+    system.scheduler.schedule(5 seconds,30 minutes,new Runnable {
+      override def run() = taskDispatcher.dispatch()
+    })
+
     StdIn.readLine()
     bindingFuture.flatMap(_.unbind()).onComplete(_ => system.terminate())
   }

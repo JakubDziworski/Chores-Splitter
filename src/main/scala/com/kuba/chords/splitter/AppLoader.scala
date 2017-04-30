@@ -3,7 +3,7 @@ package com.kuba.chords.splitter
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.kuba.chords.splitter.api.routes.Routes
-import com.kuba.chords.splitter.service.{ChoresService, TasksService, UsersService}
+import com.kuba.chords.splitter.service.{ChoresService, TasksDispatcher, TasksService, UsersService}
 import org.flywaydb.core.Flyway
 
 trait AppLoader {
@@ -11,11 +11,15 @@ trait AppLoader {
   implicit lazy val materializer = ActorMaterializer()
   val appConfig = new AppConfig {}
   lazy val db = dbSetup
+  private val chService = new ChoresService(db)
+  private val uService = new UsersService(db)
+  private val tService = new TasksService(db)
   lazy val routes = new Routes {
-    override val choresService: ChoresService = new ChoresService(db)
-    override val usersService: UsersService = new UsersService(db)
-    override val tasksService: TasksService = new TasksService(db)
+    override val choresService: ChoresService = chService
+    override val usersService: UsersService = uService
+    override val tasksService: TasksService = tService
   }
+  lazy val taskDispatcher = new TasksDispatcher(tService)
 
   def dbSetup() = {
     import slick.jdbc.H2Profile.api._

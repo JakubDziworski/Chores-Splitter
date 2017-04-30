@@ -16,6 +16,9 @@ interface BackendService {
 
     @GET("tasks")
     fun getTasks() : Flowable<GetTasksDto>
+
+    @POST("tasks")
+    fun addTask(@Body addTaskDto: AddTaskDto) : Flowable<TaskId>
     
     @GET("tasks/user/{userId}")
     fun getTasksForUser(@Path("userId")userId:String) : Flowable<GetTasksDto>
@@ -38,7 +41,7 @@ object Backend {
                 .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                 .build()
         Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8090/api/v1/")
+                .baseUrl("http://10.7.69.193:8090/api/v1/")
                 .client(httpClient)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
@@ -52,6 +55,7 @@ data class GetUserDto(val id: Long,val  name: String,val  email: String) {
         return name
     }
 }
+data class UserId(val userId: Long)
 data class GetUsersDto(val users: List<GetUserDto>)
 
 data class ChoreId(val choreId: Long)
@@ -60,5 +64,7 @@ data class GetChoresDto(val chores: List<GetChoreDto>)
 data class AddChoreDto(val name: String, val points: Int, val interval: Int?)
 data class EditChoreDto(val choreId: String, val name: String, val points: Int, val interval: Int?)
 
+data class TaskId(val taskId:Long)
 data class GetTaskDto(val id: Long, val chore:GetChoreDto, val user:GetUserDto, val assignedAt: Long, val completed: Boolean)
 data class GetTasksDto(val tasks:List<GetTaskDto>)
+data class AddTaskDto(val choreId: ChoreId,val userId: UserId)

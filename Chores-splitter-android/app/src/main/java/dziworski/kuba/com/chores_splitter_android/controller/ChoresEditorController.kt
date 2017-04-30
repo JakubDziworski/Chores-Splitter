@@ -35,6 +35,9 @@ open abstract class ChoresEditorController : Controller {
         okBtn = root.findViewById(R.id.add_modify_chore_ok_btn) as Button
         okBtn.setOnClickListener { okClicked() }
         cancelBtn.setOnClickListener { cancelClicked() }
+        choreIntervalCheckBox.setOnCheckedChangeListener{ btn,isChecked ->
+            choreIntervalPicker.isEnabled = isChecked
+        }
         onViewBinded(root)
         return root
     }

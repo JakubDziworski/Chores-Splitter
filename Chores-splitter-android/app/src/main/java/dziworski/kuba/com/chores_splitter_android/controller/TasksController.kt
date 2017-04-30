@@ -22,6 +22,7 @@ class TasksController : Controller() {
         val list = view.findViewById(R.id.tasks_list_container) as ViewGroup
         val tasksListRouter = getChildRouter(list).setPopsLastView(true);
         usersSpinner = view.findViewById(R.id.users_spinner) as Spinner
+        val addTaskBtn = view.findViewById(R.id.add_task_btn) as ImageButton
         val spinnerAdapter = ArrayAdapter<GetUserDto>(view.context,R.layout.support_simple_spinner_dropdown_item, mutableListOf())
         usersSpinner.setAdapter(spinnerAdapter)
         usersSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -31,6 +32,9 @@ class TasksController : Controller() {
                 val user = parent.getItemAtPosition(position) as GetUserDto
                 if(tasksListRouter.hasRootController()) tasksListRouter.popCurrentController()
                 tasksListRouter.setRoot(RouterTransaction.with(TasksListController(user.id)))
+                addTaskBtn.setOnClickListener {
+                    router.pushController(RouterTransaction.with(StartTaskController(user.id)))
+                }
             }
         }
         RxGateway

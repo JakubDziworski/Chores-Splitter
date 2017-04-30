@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/row_chore_uneditable_root"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/row_height"
-    android:layout_marginBottom="@dimen/row_spacing"
     android:orientation="horizontal"
     android:gravity="center"
+    android:layout_height="@dimen/row_height"
+    android:layout_marginBottom="@dimen/row_spacing"
     android:background="@android:color/holo_orange_light">
 
     <View
@@ -13,7 +14,7 @@
         android:layout_weight="1"/>
 
     <TextView
-        android:id="@+id/row_chore_name_txt"
+        android:id="@+id/row_chore_uneditable_name_txt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Kurze" />
@@ -24,7 +25,7 @@
         android:layout_weight="1"/>
 
     <TextView
-        android:id="@+id/row_chore_points_txt"
+        android:id="@+id/row_chore_uneditable_points_txt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="25 points" />
@@ -35,20 +36,14 @@
         android:layout_weight="1"/>
 
     <TextView
-        android:id="@+id/row_chore_interval_txt"
+        android:id="@+id/row_chore_uneditable_interval_txt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Co 25 a" />
+        android:text="Co 25 dni" />
 
     <View
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"/>
-
-    <ImageButton
-        android:id="@+id/row_chore_edit_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_mode_edit_black_24dp"/>
 
 </LinearLayout>
