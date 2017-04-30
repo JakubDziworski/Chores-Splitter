@@ -8,13 +8,14 @@ import android.view.ViewGroup
 import android.widget.*
 import com.bluelinelabs.conductor.Controller
 import dziworski.kuba.com.chores_splitter_android.R
+import dziworski.kuba.com.chores_splitter_android.RxGateway
 import dziworski.kuba.com.chores_splitter_android.http.Backend
 import dziworski.kuba.com.chores_splitter_android.http.GetTaskDto
-import io.reactivex.Observable
+import dziworski.kuba.com.chores_splitter_android.http.GetUserDto
+import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 class TasksController : Controller() {
@@ -25,20 +26,16 @@ class TasksController : Controller() {
         val view = inflater.inflate(R.layout.controller_tasks, container, false)
         recyclerView = view.findViewById(R.id.tasks_recycler_view) as RecyclerView
         usersSpinner = view.findViewById(R.id.users_spinner) as Spinner
-        val spinnerAdapter = ArrayAdapter(view.context,R.layout.support_simple_spinner_dropdown_item, listOf("1","2"))
+        val spinnerAdapter = ArrayAdapter<GetUserDto>(view.context,R.layout.support_simple_spinner_dropdown_item, mutableListOf())
         usersSpinner.setAdapter(spinnerAdapter)
-
-        Observable
-                .interval(0,1,TimeUnit.MINUTES)
-                .flatMap { Backend.instance.getUsers() }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy (
-                        onNext = {
-                            spinnerAdapter.clear()
-                            spinnerAdapter.addAll(it.users.map { it.id.toString() })
-                        }
-                )
+        RxGateway
+            .usersFlowable
+            .subscribeBy (
+                    onNext = {
+                        spinnerAdapter.clear()
+                        spinnerAdapter.addAll(it.users)
+                    }
+            )
         recyclerView.setHasFixedSize(true)
         recyclerView.setLayoutManager(LinearLayoutManager(view.context))
         recyclerView.setAdapter(TaskItemAdapter(LayoutInflater.from(view.context),{usersSpinner.selectedItem.toString()}))
@@ -50,17 +47,14 @@ class TasksController : Controller() {
     class TaskItemAdapter(val inflater: LayoutInflater,getUserId:() -> String) : RecyclerView.Adapter<TaskItemAdapter.ViewHolder>() {
 
         init {
-            Observable
-                    .interval(0,1,TimeUnit.MINUTES)
-                    .flatMap { Backend.instance.getTasks(getUserId()) }
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy (
-                        onNext = {
-                            items = it.tasks
-                            notifyDataSetChanged()
-                        }
-                    )
+            RxGateway
+                .tasksFlowable
+                .subscribeBy (
+                    onNext = {
+                        items = it.tasks
+                        notifyDataSetChanged()
+                    }
+                )
         }
         var items : List<GetTaskDto> = listOf()
 
@@ -80,12 +74,12 @@ class TasksController : Controller() {
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
             val nameText = view.findViewById(R.id.row_task_name_txt) as TextView
-            val pointsText = view.findViewById(R.id.row_task_points_txt) as TextView
-            val compkletedCheckBox = view.findViewById(R.id.row_task_completed_checkbox) as CheckBox
+            val pointsText = view.findViewById(R.id.row_task_points_text) as TextView
+            val completedCheckBox = view.findViewById(R.id.row_task_completed_checkbox) as CheckBox
 
             fun bind(item: GetTaskDto) {
-                nameText.setText(item.choreId.toString())
-                pointsText.setText(item.userId.toString())
+                nameText.text = item.chore.name
+                pointsText.text = item.chore.points.toString()
             }
         }
     }

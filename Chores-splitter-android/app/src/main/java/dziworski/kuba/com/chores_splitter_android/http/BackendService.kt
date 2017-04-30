@@ -1,7 +1,7 @@
 package dziworski.kuba.com.chores_splitter_android.http
 
 import android.util.Log
-import io.reactivex.Observable
+import io.reactivex.Flowable
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -13,13 +13,16 @@ import retrofit2.http.Path
 
 interface BackendService {
     @GET("users")
-    fun getUsers() : Observable<GetUsersDto>
+    fun getUsers() : Flowable<GetUsersDto>
 
+    @GET("tasks")
+    fun getTasks() : Flowable<GetTasksDto>
+    
     @GET("tasks/user/{userId}")
-    fun getTasks(@Path("userId")userId:String) : Observable<GetTasksDto>
+    fun getTasksForUser(@Path("userId")userId:String) : Flowable<GetTasksDto>
 
     @GET("chores")
-    fun getChores() : Observable<GetChoresDto>
+    fun getChores() : Flowable<GetChoresDto>
 }
 
 object Backend {
@@ -39,11 +42,15 @@ object Backend {
     }
 }
 
-data class GetUserDto(val id: Long,val  name: String,val  email: String)
+data class GetUserDto(val id: Long,val  name: String,val  email: String) {
+    override fun toString(): String {
+        return name
+    }
+}
 data class GetUsersDto(val users: List<GetUserDto>)
 
 data class GetChoreDto(val id: Long,val  name: String, val points: Int,val  interval: Int?)
 data class GetChoresDto(val chores: List<GetChoreDto>)
 
-data class GetTaskDto(val id: Long,val  choreId: Long,val  userId: Long, val assignedAt: Long, val completed: Boolean)
+data class GetTaskDto(val id: Long, val chore:GetChoreDto, val user:GetUserDto, val assignedAt: Long, val completed: Boolean)
 data class GetTasksDto(val tasks:List<GetTaskDto>)
