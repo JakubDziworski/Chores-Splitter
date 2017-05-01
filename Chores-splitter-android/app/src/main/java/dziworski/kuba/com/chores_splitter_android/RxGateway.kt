@@ -15,11 +15,12 @@ object RxGateway {
     private val tick: Flowable<Unit> = Flowable.interval(0, 1, TimeUnit.MINUTES).map { it -> Unit }
     private val choresChanged: PublishProcessor<Unit> = PublishProcessor.create<Unit>()
     private val tasksChanged: PublishProcessor<Unit> = PublishProcessor.create<Unit>()
-    val choresFlowable : Flowable<GetChoresDto>  = tick.mergeWith(choresChanged)
+    val choresFlowable: Flowable<GetChoresDto> = tick.mergeWith(choresChanged)
             .flatMap { backend.getChores() }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-    fun usersTasksFlowable(userId: Long) : Flowable<GetTasksDto> = tick
+
+    fun usersTasksFlowable(userId: Long): Flowable<GetTasksDto> = tick
             .map { userId.toString() }
             .flatMap { backend.getTasksForUser(it) }
             .subscribeOn(Schedulers.io())
@@ -37,18 +38,29 @@ object RxGateway {
     fun addChore(chore: AddChoreDto) {
         backend.addChore(chore)
                 .subscribeOn(Schedulers.io())
-                .subscribe{choresChanged.onNext(Unit)}
+                .subscribe { choresChanged.onNext(Unit) }
     }
 
     fun editChore(chore: EditChoreDto) {
-        backend.editChore(chore.choreId,chore)
+        backend.editChore(chore.choreId, chore)
                 .subscribeOn(Schedulers.io())
-                .subscribe{choresChanged.onNext(Unit)}
+                .subscribe { choresChanged.onNext(Unit) }
     }
 
     fun addTask(task: AddTaskDto) {
         backend.addTask(task)
                 .subscribeOn(Schedulers.io())
-                .subscribe{tasksChanged.onNext(Unit)}
+                .subscribe { tasksChanged.onNext(Unit) }
+    }
+
+    fun setTaskCompleted(completed: Boolean, taskId: Long) {
+        val httpCallFlowable = if (completed) {
+            backend.completeTask(taskId.toString())
+        } else {
+            backend.unCompleteTask(taskId.toString())
+        }
+        httpCallFlowable
+                .subscribeOn(Schedulers.io())
+                .subscribe { tasksChanged.onNext(Unit) }
     }
 }

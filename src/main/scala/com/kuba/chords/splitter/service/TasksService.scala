@@ -61,6 +61,14 @@ class TasksService(db: Database,clock:Clock = Clock.systemUTC) {
       .map(GetTasksDto)
   }
 
+  def setCompleted(taskId: TaskId,completed:Boolean) : Future[Done] = {
+    val q = for {
+      t <- tasks if t.id === taskId.taskId
+    } yield t.completedAt
+    val completion = if (completed) Some(now) else None
+    db.run(q.update(completion)).map(_ => Done)
+  }
+
   def getChoresAfterInterval() : Future[GetChoresDto] = {
     def milisSinceCompletion(tasks:Tables.Tasks) : Rep[Long] = {
       valueToConstColumn(now) - tasks.completedAt.getOrElse(Long.MaxValue)

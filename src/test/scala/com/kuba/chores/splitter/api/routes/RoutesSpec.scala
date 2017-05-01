@@ -107,6 +107,57 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
     }
   }
 
+  "PUT /tasks/1/set-completed" should {
+    "mark task 1 as completed" in {
+      setTime(200)
+      val andrew = addUser("andrew","andrew@gmail.com")
+      val sweep = addChore("sweep",5,Some(3))
+      val andrewSweepTask = addTask(andrew,sweep)
+      Put(s"$ApiPrefix/tasks/1/set-completed") ~> routes ~> check {
+        status shouldBe StatusCodes.OK
+      }
+      getTasks() shouldBe GetTasksDto(List(
+        GetTaskDto(
+          1,
+          GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
+          GetUserDto(1, "andrew", "andrew@gmail.com"),
+          200,
+          completed = true)
+      ))
+    }
+  }
+
+  "PUT /tasks/1/set-uncompleted" should {
+    "mark task 1 as uncompleted" in {
+      setTime(200)
+      val andrew = addUser("andrew","andrew@gmail.com")
+      val sweep = addChore("sweep",5,Some(3))
+      val andrewSweepTask = addTask(andrew,sweep)
+      Put(s"$ApiPrefix/tasks/1/set-completed") ~> routes ~> check {
+        status shouldBe StatusCodes.OK
+      }
+      getTasks() shouldBe GetTasksDto(List(
+        GetTaskDto(
+          1,
+          GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
+          GetUserDto(1, "andrew", "andrew@gmail.com"),
+          200,
+          completed = true)
+      ))
+      Put(s"$ApiPrefix/tasks/1/set-uncompleted") ~> routes ~> check {
+        status shouldBe StatusCodes.OK
+      }
+      getTasks() shouldBe GetTasksDto(List(
+        GetTaskDto(
+          1,
+          GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
+          GetUserDto(1, "andrew", "andrew@gmail.com"),
+          200,
+          completed = false)
+      ))
+    }
+  }
+
   "GET /tasks/user/1" should {
     "return users' tasks" in {
       setTime(100)
@@ -161,6 +212,12 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
   def addTask(userId:UserId,choreId:ChoreId): TaskId = {
     Post(s"$ApiPrefix/tasks",AddTaskDto(choreId,userId)) ~> routes ~> check {
       responseAs[TaskId]
+    }
+  }
+
+  def getTasks(): GetTasksDto = {
+    Get(s"$ApiPrefix/tasks") ~> routes ~> check {
+      responseAs[GetTasksDto]
     }
   }
 

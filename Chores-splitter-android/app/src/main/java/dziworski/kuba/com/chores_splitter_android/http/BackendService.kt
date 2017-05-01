@@ -23,6 +23,12 @@ interface BackendService {
     @GET("tasks/user/{userId}")
     fun getTasksForUser(@Path("userId")userId:String) : Flowable<GetTasksDto>
 
+    @PUT("tasks/{taskId}/set-completed")
+    fun completeTask(@Path("taskId")taskId:String) : Flowable<Void>
+
+    @PUT("tasks/{taskId}/set-uncompleted")
+    fun unCompleteTask(@Path("taskId")taskId:String) : Flowable<Void>
+
     @GET("chores")
     fun getChores() : Flowable<GetChoresDto>
 
@@ -31,6 +37,7 @@ interface BackendService {
 
     @PUT("chores/{choreId}")
     fun editChore(@Path("choreId") choreId:String, @Body editChoreDto: EditChoreDto) : Flowable<ChoreId>
+
 }
 
 object Backend {
@@ -41,7 +48,7 @@ object Backend {
                 .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                 .build()
         Retrofit.Builder()
-                .baseUrl("http://10.7.69.193:8090/api/v1/")
+                .baseUrl("http://10.0.2.2:8090/api/v1/")
                 .client(httpClient)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())

@@ -3,10 +3,7 @@ package dziworski.kuba.com.chores_splitter_android.controller
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.ImageButton
-import android.widget.Spinner
+import android.widget.*
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import dziworski.kuba.com.chores_splitter_android.R

@@ -19,6 +19,14 @@ trait TaskRoutes extends JsonSupport {
         val taskId = tasksService.addTask(taskDto)
         complete(Created, taskId)
       }
+    } ~ pathPrefix(LongNumber) { taskId =>
+      (path("set-completed") & put) {
+        val done = tasksService.setCompleted(TaskId(taskId),completed = true)
+        complete(OK,done)
+      } ~ (path("set-uncompleted") & put) {
+        val done = tasksService.setCompleted(TaskId(taskId),completed = false)
+        complete(OK,done)
+      }
     } ~ path("user" / LongNumber) { userId =>
      get {
        val task = tasksService.getTasksForUser(UserId(userId))

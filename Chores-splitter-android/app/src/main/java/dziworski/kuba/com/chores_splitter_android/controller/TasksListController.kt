@@ -70,6 +70,9 @@ class TasksListController : Controller {
                 nameText.text = item.chore.name
                 pointsText.text = item.chore.points.toString()
                 completedCheckBox.isChecked = item.completed
+                completedCheckBox.setOnClickListener {
+                    RxGateway.setTaskCompleted(completedCheckBox.isChecked,item.id)
+                }
             }
         }
     }
