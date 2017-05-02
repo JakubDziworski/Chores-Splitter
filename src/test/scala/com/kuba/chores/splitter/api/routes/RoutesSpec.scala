@@ -20,9 +20,9 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
 
   val clockMock = mock[Clock]
 
-  override val choresService = new ChoresService(db,clockMock)
+  override val choresService = new ChoresService(db)(clockMock)
   override val usersService = new UsersService(db)
-  override val tasksService = new TasksService(db,clockMock)
+  override val tasksService = new TasksService(db)(clockMock)
 
   "dupa" should {
     "fds" in {
