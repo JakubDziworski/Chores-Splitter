@@ -71,8 +71,8 @@ class ChoresController : Controller() {
 
             fun bind(item: GetChoreDto) {
                 nameText.text = item.name
-                pointsText.text = item.points.toString()
-                intervalText.text = item.interval?.toString().orEmpty()
+                pointsText.text = item.points.toString() + " points"
+                intervalText.text = if (item.interval != null) "Every " + item.interval.toString() + " days" else ""
                 editBtn.setOnClickListener {
                     router.pushController(RouterTransaction.with(EditChoreController(item)))
                 }

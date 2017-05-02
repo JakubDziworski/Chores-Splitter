@@ -18,7 +18,7 @@ class EditChoreController : ChoresEditorController {
         choreNameText.setText(Bundles.getChoreName(args),TextView.BufferType.EDITABLE)
         chorePointsPicker.value = Bundles.getChorePoints(args)
         choreIntervalPicker.value = Bundles.getChoreInterval(args) ?: 0
-        choreIntervalCheckBox.isEnabled = Bundles.getChoreInterval(args) != null
+        choreIntervalCheckBox.isChecked = Bundles.getChoreInterval(args) != null
     }
 
     override fun okClicked() {
@@ -31,7 +31,7 @@ class EditChoreController : ChoresEditorController {
                 Bundles.getChoreId(args).toString(),
                 choreNameText.text.toString(),
                 chorePointsPicker.value,
-                if(choreIntervalCheckBox.isEnabled) choreIntervalPicker.value else null
+                if(choreIntervalCheckBox.isChecked) choreIntervalPicker.value else null
         )
         RxGateway.editChore(chore)
     }

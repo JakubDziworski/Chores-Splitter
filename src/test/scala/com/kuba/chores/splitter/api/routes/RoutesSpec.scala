@@ -37,7 +37,7 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
   "POST /chores" should {
     "Add new Chore" in {
       setTime(100)
-      Post(s"$ApiPrefix/chores", AddChoreDto("dust", 10, Some(3))) ~> routes ~> check {
+      Post(s"$ApiPrefix/chores", AddChoreDto("dust off", 10, Some(3))) ~> routes ~> check {
         responseAs[String] shouldBe """{"choreId":1}"""
         status shouldBe StatusCodes.Created
       }
@@ -47,10 +47,10 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
   "GET /chores" should {
     "return list of chores" in {
       setTime(100)
-      addChore("dust", 10, Some(5))
+      addChore("dust off", 10, Some(5))
       Get(s"$ApiPrefix/chores") ~> routes ~> check {
         responseAs[GetChoresDto] shouldBe GetChoresDto(
-          List(GetChoreDto(1, "dust", 10, Some(5)))
+          List(GetChoreDto(1, "dust off", 10, Some(5)))
         )
       }
     }
@@ -70,13 +70,26 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
   }
 
   "PUT /chores/1" should {
-    "edit chore returns Created with new chore id" in {
+    "edit chore returning Created with new chore id" in {
       setTime(100)
-      val dustId = addChore("dust",5,Some(3))
-      val dto = AddChoreDto("dust harder",7,Some(2))
+      val dustId = addChore("dust off",5,Some(3))
+      val dto = AddChoreDto("dust off harder",7,Some(2))
       Put(s"$ApiPrefix/chores/1",dto) ~> routes ~> check {
         responseAs[ChoreId] shouldBe ChoreId(2)
       }
+    }
+    "return only newest edited version of chore" in {
+      setTime(100)
+      val dustId = addChore("dust off",5,Some(3))
+      val dto = AddChoreDto("dust off harder",7,None)
+      Put(s"$ApiPrefix/chores/1",dto) ~> routes ~> check {
+        responseAs[ChoreId] shouldBe ChoreId(2)
+      }
+      getChores shouldBe GetChoresDto(List(
+        GetChoreDto(
+          2,"dust off harder",7,None
+        )
+      ))
     }
   }
 
@@ -197,9 +210,15 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
     (clockMock.instant _).expects().anyNumberOfTimes.returning(Instant.ofEpochMilli(time))
   }
 
-  def addChore(name: String = "dust", points: Int = 10, interval: Option[Int] = Some(5)): ChoreId = {
+  def addChore(name: String = "dust off", points: Int = 10, interval: Option[Int] = Some(5)): ChoreId = {
     Post(s"$ApiPrefix/chores", AddChoreDto(name, points, interval)) ~> routes ~> check {
       responseAs[ChoreId]
+    }
+  }
+
+  def getChores(): GetChoresDto = {
+    Get(s"$ApiPrefix/chores") ~> routes ~> check {
+      responseAs[GetChoresDto]
     }
   }
 
