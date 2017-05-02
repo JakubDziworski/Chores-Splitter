@@ -34,6 +34,10 @@ class StartTaskController : Controller {
         return root
     }
 
+    override fun handleBack(): Boolean {
+        return router.popCurrentController()
+    }
+
     inner class ChoreItemAdapter(val inflater: LayoutInflater) : RecyclerView.Adapter<ChoreItemAdapter.ViewHolder>() {
 
         init {
@@ -69,15 +73,17 @@ class StartTaskController : Controller {
 
             fun bind(item: GetChoreDto) {
                 nameText.text = item.name
-                pointsText.text = item.points.toString()
-                intervalText.text = item.interval?.toString().orEmpty()
+                pointsText.text = item.points.toString() + " points"
+                intervalText.text = if(item.interval != null) "Every " + item.interval.toString() + " days" else ""
                 val addTask =  {
                     val userId = TasksListController.getUserId(args)
                     val task = AddTaskDto(ChoreId(item.id), UserId(userId))
                     RxGateway.addTask(task)
                 }
-                view.setOnClickListener{addTask()}
-
+                view.setOnClickListener{
+                    addTask()
+                    router.popCurrentController()
+                }
             }
 
         }

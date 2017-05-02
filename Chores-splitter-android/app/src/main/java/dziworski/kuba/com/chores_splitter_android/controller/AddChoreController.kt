@@ -22,7 +22,7 @@ class AddChoreController() : ChoresEditorController() {
         val chore = AddChoreDto(
                 choreNameText.text.toString(),
                 chorePointsPicker.value,
-                if(choreIntervalCheckBox.isEnabled) choreIntervalPicker.value else null
+                if(choreIntervalCheckBox.isChecked) choreIntervalPicker.value else null
         )
         RxGateway.addChore(chore)
     }

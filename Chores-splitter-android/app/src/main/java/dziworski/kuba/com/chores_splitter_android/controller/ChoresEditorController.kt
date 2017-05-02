@@ -12,7 +12,7 @@ import dziworski.kuba.com.chores_splitter_android.R
 /**
  * Created by jdziworski on 30.04.17.
  */
-open abstract class ChoresEditorController : Controller {
+abstract class ChoresEditorController : Controller {
 
     lateinit protected var choreNameText : EditText
     lateinit protected var choreIntervalCheckBox : CheckBox
@@ -31,15 +31,26 @@ open abstract class ChoresEditorController : Controller {
         choreIntervalCheckBox = root.findViewById(R.id.add_modify_chore_interval_enabled) as CheckBox
         chorePointsPicker = root.findViewById(R.id.add_modify_chore_points_picker) as NumberPicker
         choreIntervalPicker = root.findViewById(R.id.add_modify_chore_interval_picker) as NumberPicker
+        choreIntervalPicker.maxValue = 365
+        choreIntervalPicker.minValue = 0
+        chorePointsPicker.maxValue = 500
+        chorePointsPicker.minValue = 0
         cancelBtn = root.findViewById(R.id.add_modify_chore_cancel_btn) as Button
         okBtn = root.findViewById(R.id.add_modify_chore_ok_btn) as Button
         okBtn.setOnClickListener { okClicked() }
         cancelBtn.setOnClickListener { cancelClicked() }
-        choreIntervalCheckBox.setOnCheckedChangeListener{ btn,isChecked ->
-            choreIntervalPicker.isEnabled = isChecked
-        }
+        setupIntervalPickerDisabling()
         onViewBinded(root)
         return root
+    }
+
+    fun setupIntervalPickerDisabling() {
+        choreIntervalPicker.isEnabled  = choreIntervalCheckBox.isChecked
+        choreIntervalPicker.alpha  = if (choreIntervalCheckBox.isChecked) 1.0f else 0.1f
+        choreIntervalCheckBox.setOnCheckedChangeListener{ btn,isChecked ->
+            choreIntervalPicker.isEnabled = isChecked
+            choreIntervalPicker.alpha = if (isChecked) 1.0f else 0.1f
+        }
     }
 
     open fun onViewBinded(root: View) {
