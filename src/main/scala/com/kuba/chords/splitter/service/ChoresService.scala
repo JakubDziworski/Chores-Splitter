@@ -6,37 +6,39 @@ import java.time.Clock
 import com.kuba.chords.splitter.api.routes.dto.ChoreDtos._
 import com.kuba.dziworski.chords.splitter.slick.Tables
 import com.kuba.chords.splitter.api.routes.dto.RowConversions._
+import com.kuba.dziworski.chords.splitter.slick.Tables.ChoresRow
+import com.kuba.chords.splitter.util.TimeUtil._
 import slick.jdbc.H2Profile.api._
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
-class ChoresService(db: Database,clock: Clock = Clock.systemUTC()) {
+class ChoresService(db: Database)(implicit clock: Clock = Clock.systemUTC()) {
 
   private val AutoInc = 0
   val chores = Tables.Chores
 
-  def now(): Long = {
-    Timestamp.from(clock.instant()).getTime
-  }
   def addChore(addChoreDto: AddChoreDto): Future[ChoreId] = {
-    val columns = chores.map(c => (c.name,c.points,c.createdAt, c.interval))
-    val row = (addChoreDto.name, addChoreDto.points,now(),addChoreDto.interval)
-    val action = columns returning chores.map(_.choreId) += row
-    db.run(action).map(id => ChoreId(id))
+    def row(length:Long) = ChoresRow(length+1,length+1,now, addChoreDto.name,addChoreDto.points,addChoreDto.interval)
+
+    val q = for {
+      length <- chores.length.result
+      insertedId <- chores returning chores.map(_.choreId) += row(length)
+    } yield insertedId
+    db.run(q).map(id => ChoreId(id))
   }
 
   def editChore(choreId: ChoreId, dto: AddChoreDto): Future[ChoreId] = {
     def querySrcChoreId = {
       chores
         .filter(_.choreId === choreId.choreId)
-        .map(ch => ch.srcChoreId.getOrElse(ch.choreId))
+        .map(ch => ch.srcChoreId)
         .result.head
     }
 
     def insert(srcChoreId:Long) = {
       val columns = chores.map(c => (c.srcChoreId ,c.name,c.points,c.createdAt, c.interval))
-      val row = (Some(srcChoreId),dto.name,dto.points,now(),dto.interval)
+      val row = (srcChoreId,dto.name,dto.points,now,dto.interval)
       columns returning chores.map(_.choreId) += row
     }
 
@@ -49,8 +51,15 @@ class ChoresService(db: Database,clock: Clock = Clock.systemUTC()) {
   }
 
   def getChores: Future[GetChoresDto] = {
-    val action = chores.distinctOn(ch => ch.srcChoreId.getOrElse(ch.choreId)).result
-    db.run(action).map(_.map(_.toDto).toList).map(GetChoresDto)
+    val newestChoresIds = chores.groupBy(_.srcChoreId).map{case (srcId,chrs) =>
+        chrs.map(_.choreId).max.getOrElse(0L)
+    }
+    val q = for {
+      chId <- newestChoresIds
+      ch <- chores if ch.choreId === chId
+    } yield ch
+
+    db.run(q.result).map(_.map(_.toDto).toList).map(GetChoresDto)
   }
 
   def getChore(id: ChoreId): Future[GetChoreDto] = {
