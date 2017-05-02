@@ -19,13 +19,16 @@ class ChoresService(db: Database)(implicit clock: Clock = Clock.systemUTC()) {
   val chores = Tables.Chores
 
   def addChore(addChoreDto: AddChoreDto): Future[ChoreId] = {
-    def row(length:Long) = ChoresRow(length+1,length+1,now, addChoreDto.name,addChoreDto.points,addChoreDto.interval)
+    val row = {
+      chores.length.result.map(l => ChoresRow(l+1,l+1,now, addChoreDto.name,addChoreDto.points,addChoreDto.interval))
+    }
 
-    val q = for {
-      length <- chores.length.result
-      insertedId <- chores returning chores.map(_.choreId) += row(length)
+    val action = for {
+      r <-row
+      insertedId <- chores returning chores.map(_.choreId) forceInsert r
     } yield insertedId
-    db.run(q).map(id => ChoreId(id))
+
+    db.run(action).map(id => ChoreId(id))
   }
 
   def editChore(choreId: ChoreId, dto: AddChoreDto): Future[ChoreId] = {

@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
 
-class TasksService(db: Database,clock:Clock = Clock.systemUTC) {
+class TasksService(db: Database)(implicit clock:Clock = Clock.systemUTC) {
   private val AutoInc = 0
   val tasks = Tables.Tasks
   val chores = Tables.Chores
