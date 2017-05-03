@@ -6,7 +6,6 @@ import dziworski.kuba.com.chores_splitter_android.http.*
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.processors.PublishProcessor
-import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 
@@ -21,11 +20,6 @@ object RxGateway {
     private val tasksChanged: PublishProcessor<Unit> = PublishProcessor.create<Unit>()
     val choresFlowable: Flowable<GetChoresDto> = tick.mergeWith(choresChanged)
             .flatMap { backend.getChores() }
-            .subOnIoObservOnMainWithErrorHandling()
-
-    fun usersTasksFlowable(userId: Long): Flowable<GetTasksDto> = tick
-            .map { userId.toString() }
-            .flatMap { backend.getTasksForUser(it) }
             .subOnIoObservOnMainWithErrorHandling()
 
     val usersFlowable = tick
