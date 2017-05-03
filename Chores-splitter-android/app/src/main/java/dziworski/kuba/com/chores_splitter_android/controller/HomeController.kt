@@ -11,6 +11,7 @@ import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.support.RouterPagerAdapter
 import dziworski.kuba.com.chores_splitter_android.R
+import dziworski.kuba.com.chores_splitter_android.RxGateway
 
 class HomeController : Controller() {
 
@@ -40,6 +41,14 @@ class HomeController : Controller() {
         viewPager.setAdapter(pagerAdapter)
         tabLayout.setupWithViewPager(viewPager)
         return view
+    }
+
+    override fun onDetach(view: View) {
+        RxGateway.tickEnabled = false
+    }
+
+    override fun onAttach(view: View) {
+        RxGateway.tickEnabled = true
     }
 }
 

@@ -46,7 +46,7 @@ class TasksListController : Controller {
                             }
                     )
         }
-        var items : List<GetTaskDto> = listOf(GetTaskDto(1, GetChoreDto(2,"lala",15,null), GetUserDto(1,"la","ds"),2,false))
+        var items : List<GetTaskDto> = listOf()
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val row = inflater.inflate(R.layout.row_task,parent,false)
