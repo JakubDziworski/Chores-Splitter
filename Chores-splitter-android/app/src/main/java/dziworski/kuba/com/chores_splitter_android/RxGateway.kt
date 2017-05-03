@@ -18,7 +18,8 @@ object RxGateway {
     private val tick: Flowable<Unit> = Flowable.interval(0, 1, TimeUnit.MINUTES).map { it -> Unit }
     private val choresChanged: PublishProcessor<Unit> = PublishProcessor.create<Unit>()
     private val tasksChanged: PublishProcessor<Unit> = PublishProcessor.create<Unit>()
-    val choresFlowable: Flowable<GetChoresDto> = tick.mergeWith(choresChanged)
+    val choresFlowable: Flowable<GetChoresDto> = tick
+            .mergeWith(choresChanged)
             .flatMap { backend.getChores() }
             .subOnIoObservOnMainWithErrorHandling()
 
@@ -27,6 +28,7 @@ object RxGateway {
             .subOnIoObservOnMainWithErrorHandling()
 
     val tasksFlowable = tick
+            .mergeWith { tasksChanged }
             .flatMap { backend.getTasks() }
             .subOnIoObservOnMainWithErrorHandling()
 
