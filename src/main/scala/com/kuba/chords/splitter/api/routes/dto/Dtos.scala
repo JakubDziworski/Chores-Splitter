@@ -3,20 +3,19 @@ package com.kuba.chords.splitter.api.routes.dto
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import com.kuba.chords.splitter.api.routes.dto.TaskDtos._
 import com.kuba.chords.splitter.api.routes.dto.ChoreDtos._
+import com.kuba.chords.splitter.api.routes.dto.PenaltyDtos.{GetPenaltyDto, PenaltyFormat}
 import com.kuba.chords.splitter.api.routes.dto.UserDtos._
-import com.kuba.dziworski.chords.splitter.slick.Tables.{ChoresRow, TasksRow, UsersRow}
+import com.kuba.dziworski.chords.splitter.slick.Tables.{ChoresRow, PenaltiesRow, TasksRow, UsersRow}
 import spray.json.DefaultJsonProtocol
 
-trait OutputDto
-trait InputDto
-trait JsonSupport extends ChoreFormat with TaskFormat with UserFormat
+trait JsonSupport extends ChoreFormat with TaskFormat with UserFormat with PenaltyFormat
 
 object ChoreDtos {
   case class AddChoreDto(name: String, points: Int, interval: Option[Int])
   case class EditChoreDto(choreId: String,name: String, points: Int, interval: Option[Int])
-  case class ChoreId(choreId: Long) extends InputDto
-  case class GetChoreDto(id: Long, name: String, points: Int, interval: Option[Int]) extends OutputDto
-  case class GetChoresDto(chores: List[GetChoreDto]) extends OutputDto
+  case class ChoreId(choreId: Long)
+  case class GetChoreDto(id: Long, name: String, points: Int, interval: Option[Int])
+  case class GetChoresDto(chores: List[GetChoreDto])
 
   trait ChoreFormat extends SprayJsonSupport with DefaultJsonProtocol {
     implicit lazy val choreInputDtoFormat = jsonFormat3(AddChoreDto)
@@ -29,13 +28,13 @@ object ChoreDtos {
 
 object UserDtos {
 
-  case class UserId(userId: Long) extends InputDto
+  case class UserId(userId: Long)
 
-  case class AddUserDto(name: String, email: String) extends InputDto
+  case class AddUserDto(name: String, email: String)
 
-  case class GetUserDto(id: Long, name: String, email: String) extends OutputDto
+  case class GetUserDto(id: Long, name: String, email: String)
 
-  case class GetUsersDto(users: List[GetUserDto]) extends OutputDto
+  case class GetUsersDto(users: List[GetUserDto])
 
   trait UserFormat extends SprayJsonSupport with DefaultJsonProtocol {
     implicit lazy val userIdFormat = jsonFormat1(UserId)
@@ -46,7 +45,7 @@ object UserDtos {
 }
 
 object TaskDtos {
-  case class TaskId(taskId:Long) extends InputDto
+  case class TaskId(taskId:Long)
   case class AddTaskDto(choreId: ChoreId, userId: UserId)
   case class GetTaskDto(id: Long, chore:GetChoreDto, user:GetUserDto, assignedAt: Long, completed: Boolean)
   case class GetTasksDto(tasks:List[GetTaskDto])
@@ -56,6 +55,20 @@ object TaskDtos {
     implicit lazy val taskIdFormat = jsonFormat1(TaskId)
     implicit lazy val getTaskDtoFormat = jsonFormat5(GetTaskDto)
     implicit lazy val getTasksDtoFormat = jsonFormat1(GetTasksDto)
+  }
+}
+
+object PenaltyDtos {
+  case class PenaltyId(penaltyId:Long)
+  case class AddPenaltyDto(userId: Long,points:Int,reason:String)
+  case class GetPenaltyDto(id:Long,userId:Long,points:Int,reason:String)
+  case class GetPenaltiesDto(penalties:List[GetPenaltyDto])
+
+  trait PenaltyFormat extends SprayJsonSupport with DefaultJsonProtocol {
+    implicit val penaltyIdFormat = jsonFormat1(PenaltyId)
+    implicit val addPenaltyFormat = jsonFormat3(AddPenaltyDto)
+    implicit val getPenaltyFormat = jsonFormat4(GetPenaltyDto)
+    implicit val getPenaltiesFormat = jsonFormat1(GetPenaltiesDto)
   }
 }
 
@@ -80,6 +93,17 @@ object RowConversions {
         userRow.toDto,
         taskRow.assignedAt,
         taskRow.completedAt.isDefined
+      )
+    }
+  }
+
+  implicit class PenaltyConverter(penaltyRow: PenaltiesRow) {
+    def toDto: GetPenaltyDto = {
+      GetPenaltyDto(
+        penaltyRow.id,
+        penaltyRow.userId,
+        penaltyRow.points,
+        penaltyRow.reason
       )
     }
   }

@@ -8,9 +8,10 @@ import com.kuba.chords.splitter.AppConfig
 import com.kuba.chords.splitter.api.routes.Routes
 import com.kuba.chords.splitter.api.routes.dto.ChoreDtos._
 import com.kuba.chords.splitter.api.routes.dto.JsonSupport
+import com.kuba.chords.splitter.api.routes.dto.PenaltyDtos.{AddPenaltyDto, GetPenaltiesDto, GetPenaltyDto, PenaltyId}
 import com.kuba.chords.splitter.api.routes.dto.TaskDtos._
 import com.kuba.chords.splitter.api.routes.dto.UserDtos._
-import com.kuba.chords.splitter.service.{ChoresService, TasksService, UsersService}
+import com.kuba.chords.splitter.service.{ChoresService, PenaltyService, TasksService, UsersService}
 import com.kuba.chores.splitter.util.DbSetUp
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpec}
@@ -23,6 +24,8 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
   override val choresService = new ChoresService(db)(clockMock)
   override val usersService = new UsersService(db)
   override val tasksService = new TasksService(db)(clockMock)
+  override val penaltiesService = new PenaltyService(db)(clockMock)
+
 
   "dupa" should {
     "fds" in {
@@ -201,6 +204,20 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
         responseAs[GetUsersDto] shouldBe GetUsersDto(List(
           GetUserDto(1, "john", "john@gmail.com"),
           GetUserDto(2, "stefan", "stefan@gmail.com")
+        ))
+      }
+    }
+  }
+
+  "POST and GET /penalties" should {
+    "add and return penalties" in {
+      val userId = addUser().userId
+      Post(s"$ApiPrefix/penalties",AddPenaltyDto(userId,10,"did not sweep")) ~> routes ~> check {
+        responseAs[PenaltyId] shouldBe PenaltyId(1)
+      }
+      Get(s"$ApiPrefix/penalties") ~> routes ~> check {
+        responseAs[GetPenaltiesDto] shouldBe GetPenaltiesDto(List(
+          GetPenaltyDto(1,userId,10,"did not sweep")
         ))
       }
     }
