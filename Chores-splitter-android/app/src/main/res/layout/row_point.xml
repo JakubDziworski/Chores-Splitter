@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/row_height"
+    android:layout_marginBottom="@dimen/row_spacing"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:background="@android:color/holo_green_dark">
+
+    <TextView
+        android:layout_marginLeft="25dp"
+        android:id="@+id/row_point_user_name_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Kurze" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"/>
+
+    <TextView
+        android:id="@+id/row_point_points_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="25 points" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"/>
+
+    <TextView
+        android:id="@+id/row_point_interval_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Co 25 a" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"/>
+
+</LinearLayout>

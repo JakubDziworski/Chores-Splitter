@@ -12,36 +12,24 @@ import dziworski.kuba.com.chores_splitter_android.http.GetUserDto
 import io.reactivex.rxkotlin.subscribeBy
 
 class TasksController : Controller() {
-    lateinit var usersSpinner : Spinner
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
         val view = inflater.inflate(R.layout.controller_tasks, container, false)
-        val list = view.findViewById(R.id.tasks_list_container) as ViewGroup
-        val tasksListRouter = getChildRouter(list).setPopsLastView(true);
-        usersSpinner = view.findViewById(R.id.users_spinner) as Spinner
-        val addTaskBtn = view.findViewById(R.id.add_task_btn) as ImageButton
-        val spinnerAdapter = ArrayAdapter<GetUserDto>(view.context,R.layout.support_simple_spinner_dropdown_item, mutableListOf())
-        usersSpinner.setAdapter(spinnerAdapter)
-        usersSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>) {}
 
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val user = parent.getItemAtPosition(position) as GetUserDto
-                if(tasksListRouter.hasRootController()) tasksListRouter.popCurrentController()
-                tasksListRouter.setRoot(RouterTransaction.with(TasksListController(user.id)))
-                addTaskBtn.setOnClickListener {
-                    router.pushController(RouterTransaction.with(StartTaskController(user.id)))
-                }
+        val taskListControllerContainer = view.findViewById(R.id.tasks_list_container) as ViewGroup
+        val tasksListRouter = getChildRouter(taskListControllerContainer);
+        val addTaskBtn = view.findViewById(R.id.add_task_btn) as ImageButton
+
+        val usersControllerContainer = view.findViewById(R.id.tasks_users_controller) as ViewGroup
+        val usersRouter = getChildRouter(usersControllerContainer);
+        val usersController = UsersController()
+        usersController.userChangeListener = { user : GetUserDto ->
+            if(tasksListRouter.hasRootController()) tasksListRouter.popCurrentController()
+            tasksListRouter.setRoot(RouterTransaction.with(TasksListController(user.id)))
+            addTaskBtn.setOnClickListener {
+                router.pushController(RouterTransaction.with(StartTaskController(user.id)))
             }
         }
-        RxGateway
-            .usersFlowable
-            .subscribeBy (
-                    onNext = {
-                        spinnerAdapter.clear()
-                        spinnerAdapter.addAll(it.users)
-                    }
-            )
+        usersRouter.pushController(RouterTransaction.with(usersController))
         return view
     }
 
