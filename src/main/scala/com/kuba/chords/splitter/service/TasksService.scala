@@ -18,50 +18,51 @@ import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
 
-class TasksService(db: Database)(implicit clock:Clock = Clock.systemUTC) {
+class TasksService(db: Database)(implicit clock: Clock = Clock.systemUTC) {
   private val AutoInc = 0
   val tasks = Tables.Tasks
   val chores = Tables.Chores
   val users = Tables.Users
+  val penalties = Tables.Penalties
   val tasksDispatches = Tables.TasksDispatches
 
-  def now  = Timestamp.from(Instant.now(clock)).getTime
+  def now = Timestamp.from(Instant.now(clock)).getTime
 
-  def addTasks(newTasks:List[AddTaskDto]) : Future[List[TaskId]] = {
-    val rows = newTasks.map(dto => TasksRow(AutoInc,dto.userId.userId,dto.choreId.choreId,now,None))
+  def addTasks(newTasks: List[AddTaskDto]): Future[List[TaskId]] = {
+    val rows = newTasks.map(dto => TasksRow(AutoInc, dto.userId.userId, dto.choreId.choreId, now, None))
     val action = tasks returning tasks.map(_.id) ++= rows
     db.run(action).map(_.map(TaskId).toList)
   }
 
-  def addTask(dto:AddTaskDto) : Future[TaskId] = {
-    val row = TasksRow(AutoInc,dto.userId.userId,dto.choreId.choreId,now,None)
-    val action = tasks  returning tasks.map(_.id) += row
+  def addTask(dto: AddTaskDto): Future[TaskId] = {
+    val row = TasksRow(AutoInc, dto.userId.userId, dto.choreId.choreId, now, None)
+    val action = tasks returning tasks.map(_.id) += row
     db.run(action).map(TaskId)
   }
 
-  def getTasksForUser(userId:UserId): Future[GetTasksDto] = {
+  def getTasksForUser(userId: UserId): Future[GetTasksDto] = {
     val query = for {
       ch <- chores
       t <- tasks if t.choreId === ch.choreId
       u <- users.filter(_.id === userId.userId) if t.userId === u.id
-    } yield (ch,t,u)
+    } yield (ch, t, u)
     db.run(query.result)
-      .map(_.map{case (chRow,tRow,uRow) => tRow.toDto(chRow,uRow)}.toList)
+      .map(_.map { case (chRow, tRow, uRow) => tRow.toDto(chRow, uRow) }.toList)
       .map(GetTasksDto)
   }
 
-  def getTasks() : Future[GetTasksDto] = {
+  def getTasks(): Future[GetTasksDto] = {
     val query = for {
       ch <- chores
       t <- tasks if t.choreId === ch.choreId
       u <- users if t.userId === u.id
-    } yield (ch,t,u)
+    } yield (ch, t, u)
     db.run(query.result)
-      .map(_.map{case (chRow,tRow,uRow) => tRow.toDto(chRow,uRow)}.toList)
+      .map(_.map { case (chRow, tRow, uRow) => tRow.toDto(chRow, uRow) }.toList)
       .map(GetTasksDto)
   }
 
-  def setCompleted(taskId: TaskId,completed:Boolean) : Future[Done] = {
+  def setCompleted(taskId: TaskId, completed: Boolean): Future[Done] = {
     val q = for {
       t <- tasks if t.id === taskId.taskId
     } yield t.completedAt
@@ -69,12 +70,12 @@ class TasksService(db: Database)(implicit clock:Clock = Clock.systemUTC) {
     db.run(q.update(completion)).map(_ => Done)
   }
 
-  def getChoresAfterInterval() : Future[GetChoresDto] = {
-    def milisSinceCompletion(tasks:Tables.Tasks) : Rep[Long] = {
+  def getChoresAfterInterval(): Future[GetChoresDto] = {
+    def milisSinceCompletion(tasks: Tables.Tasks): Rep[Long] = {
       valueToConstColumn(now) - tasks.completedAt.getOrElse(Long.MaxValue)
     }
 
-    def toMilis(days:Rep[Int]): Rep[Int] = {
+    def toMilis(days: Rep[Int]): Rep[Int] = {
       days * (24 * 60 * 60 * 1000)
     }
 
@@ -85,24 +86,27 @@ class TasksService(db: Database)(implicit clock:Clock = Clock.systemUTC) {
     db.run(q.result).map(_.map(_.toDto).toList).map(GetChoresDto)
   }
 
-  def getUsersPoints() : Future[List[UserPoint]] = {
+  def getUsersPoints(): Future[List[UserPoint]] = {
     val q = (for {
       t <- tasks
       u <- users if t.userId === u.id && t.completedAt.isDefined
       c <- chores if t.choreId === c.choreId
-    } yield (t,c)).groupBy(_._1.id).map{ case (userId,tc) =>
-      val sumOfAllTransactonsForUser = tc.map(_._2.points).sum.getOrElse(0)
-      (userId,sumOfAllTransactonsForUser)
+      p <- penalties if p.userId === u.id
+    } yield (t, c, p)).groupBy(_._1.id).map { case (userId, tcp) =>
+      val sumOfAllTransactonsForUser = tcp.map(_._2.points).sum.getOrElse(0)
+      val sumOfPenaltiesForUser = tcp.map(_._3.points).sum.getOrElse(0)
+      val totalPointsForUser = sumOfAllTransactonsForUser - sumOfPenaltiesForUser
+      (userId, totalPointsForUser)
     }
-    db.run(q.result).map(_.map{case (userId,points) => UserPoint(UserId(userId),points)}.toList)
+    db.run(q.result).map(_.map { case (userId, points) => UserPoint(UserId(userId), points) }.toList)
   }
 
-  def getLastTaskDispatch() : Future[Long] = {
+  def getLastTaskDispatch(): Future[Long] = {
     val q = tasksDispatches.sortBy(_.id.desc).map(_.dispatchedAt)
     db.run(q.result.headOption).map(_.getOrElse(0))
   }
 
-  def updateLastTaskDispatch() : Future[Done] = {
+  def updateLastTaskDispatch(): Future[Done] = {
     val q = tasksDispatches.map(_.dispatchedAt) += now
     db.run(q).map(_ => Done)
   }
