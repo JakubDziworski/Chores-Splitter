@@ -21,41 +21,38 @@ object RxGateway {
     private val tasksChanged: PublishProcessor<Unit> = PublishProcessor.create<Unit>()
     val choresFlowable: Flowable<GetChoresDto> = tick.mergeWith(choresChanged)
             .flatMap { backend.getChores() }
-            .setUpFlowable()
+            .subOnIoObservOnMainWithErrorHandling()
 
     fun usersTasksFlowable(userId: Long): Flowable<GetTasksDto> = tick
             .map { userId.toString() }
             .flatMap { backend.getTasksForUser(it) }
-            .setUpFlowable()
+            .subOnIoObservOnMainWithErrorHandling()
 
     val usersFlowable = tick
             .flatMap { backend.getUsers() }
-            .setUpFlowable()
+            .subOnIoObservOnMainWithErrorHandling()
 
     val tasksFlowable = tick
             .flatMap { backend.getTasks() }
-            .setUpFlowable()
+            .subOnIoObservOnMainWithErrorHandling()
 
 
     fun addChore(chore: AddChoreDto) {
         backend.addChore(chore)
-                .setUpFlowable()
-
+                .subOnIoWithErrorHandling()
+                .subscribe { choresChanged.onNext(Unit) }
     }
 
     fun editChore(chore: EditChoreDto) {
         backend.editChore(chore.choreId, chore)
-                .setUpFlowable()
+                .subOnIoWithErrorHandling()
                 .subscribe { choresChanged.onNext(Unit) }
     }
 
     fun addTask(task: AddTaskDto) {
         backend.addTask(task)
-                .setUpFlowable()
-                .subscribeBy(
-                        onNext = { tasksChanged.onNext(Unit) },
-                        onError = { err -> }
-                )
+                .subOnIoWithErrorHandling()
+                .subscribe{ tasksChanged.onNext(Unit) }
     }
 
     fun setTaskCompleted(completed: Boolean, taskId: Long) {
@@ -65,21 +62,32 @@ object RxGateway {
             backend.unCompleteTask(taskId.toString())
         }
         httpCallFlowable
-                .setUpFlowable()
+                .subOnIoWithErrorHandling()
                 .subscribe { tasksChanged.onNext(Unit) }
     }
 
-    fun <T> Flowable<T>.setUpFlowable() : Flowable<T> {
+    fun <T> Flowable<T>.subOnIoObservOnMainWithErrorHandling() : Flowable<T> {
         return this
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .onErrorResumeNext { exception : Throwable ->
-                    Toast.makeText(
-                        ChoresSplitterApp.instance,
-                        "NETWORK ERROR $exception",
-                        Toast.LENGTH_SHORT)
-                        .show()
-                    Flowable.empty()
-                }
+                .withErrorHandling()
+    }
+
+    fun <T> Flowable<T>.subOnIoWithErrorHandling() : Flowable<T> {
+        return this
+                .subscribeOn(Schedulers.io())
+                .withErrorHandling()
+    }
+
+    fun <T> Flowable<T>.withErrorHandling() : Flowable<T> {
+        return this.retry { exception: Throwable ->
+            Log.e(RxGateway::class.toString(), exception.stackTrace.joinToString("\n"))
+            Toast.makeText(
+                    ChoresSplitterApp.instance,
+                    "NETWORK ERROR $exception",
+                    Toast.LENGTH_SHORT)
+                    .show()
+            false
+        }
     }
 }

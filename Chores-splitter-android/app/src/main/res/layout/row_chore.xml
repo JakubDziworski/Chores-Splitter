@@ -7,12 +7,8 @@
     android:gravity="center"
     android:background="@android:color/holo_orange_light">
 
-    <View
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"/>
-
     <TextView
+        android:layout_marginLeft="25dp"
         android:id="@+id/row_chore_name_txt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -49,6 +45,9 @@
         android:id="@+id/row_chore_edit_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginRight="25dp"
+        android:background="@android:color/transparent"
         android:src="@drawable/ic_mode_edit_black_24dp"/>
+
 
 </LinearLayout>
