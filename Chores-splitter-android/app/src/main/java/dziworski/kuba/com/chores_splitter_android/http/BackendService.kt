@@ -38,6 +38,12 @@ interface BackendService {
     @PUT("chores/{choreId}")
     fun editChore(@Path("choreId") choreId:String, @Body editChoreDto: EditChoreDto) : Flowable<ChoreId>
 
+    @POST("penalties")
+    fun addPenalty(@Body addPenaltyDto: AddPenaltyDto) : Flowable<PenaltyId>
+
+    @GET("penalties")
+    fun getPenalties() : Flowable<GetPenaltiesDto>
+
 }
 
 object Backend {
@@ -76,3 +82,8 @@ data class TaskId(val taskId:Long)
 data class GetTaskDto(val id: Long, val chore:GetChoreDto, val user:GetUserDto, val assignedAt: Long, val completed: Boolean)
 data class GetTasksDto(val tasks:List<GetTaskDto>)
 data class AddTaskDto(val choreId: ChoreId,val userId: UserId)
+
+data class PenaltyId(val penaltyId:Long)
+data class AddPenaltyDto(val userId: Long,val points:Int,val reason:String)
+data class GetPenaltyDto(val id:Long,val userId:Long,val points:Int,val reason:String)
+data class GetPenaltiesDto(val penalties:List<GetPenaltyDto>)

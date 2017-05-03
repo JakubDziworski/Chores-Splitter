@@ -70,46 +70,4 @@ class TasksService(db: Database)(implicit clock: Clock = Clock.systemUTC) {
     db.run(q.update(completion)).map(_ => Done)
   }
 
-  def getChoresAfterInterval(): Future[GetChoresDto] = {
-    def milisSinceCompletion(tasks: Tables.Tasks): Rep[Long] = {
-      valueToConstColumn(now) - tasks.completedAt.getOrElse(Long.MaxValue)
-    }
-
-    def toMilis(days: Rep[Int]): Rep[Int] = {
-      days * (24 * 60 * 60 * 1000)
-    }
-
-    val q = for {
-      ch <- chores
-      t <- tasks if (t.choreId === ch.choreId && milisSinceCompletion(t) < ch.interval.getOrElse(0).asColumnOf[Long])
-    } yield ch
-    db.run(q.result).map(_.map(_.toDto).toList).map(GetChoresDto)
-  }
-
-  def getUsersPoints(): Future[List[UserPoint]] = {
-    val q = (for {
-      t <- tasks
-      u <- users if t.userId === u.id && t.completedAt.isDefined
-      c <- chores if t.choreId === c.choreId
-      p <- penalties if p.userId === u.id
-    } yield (t, c, p)).groupBy(_._1.id).map { case (userId, tcp) =>
-      val sumOfAllTransactonsForUser = tcp.map(_._2.points).sum.getOrElse(0)
-      val sumOfPenaltiesForUser = tcp.map(_._3.points).sum.getOrElse(0)
-      val totalPointsForUser = sumOfAllTransactonsForUser - sumOfPenaltiesForUser
-      (userId, totalPointsForUser)
-    }
-    db.run(q.result).map(_.map { case (userId, points) => UserPoint(UserId(userId), points) }.toList)
-  }
-
-  def getLastTaskDispatch(): Future[Long] = {
-    val q = tasksDispatches.sortBy(_.id.desc).map(_.dispatchedAt)
-    db.run(q.result.headOption).map(_.getOrElse(0))
-  }
-
-  def updateLastTaskDispatch(): Future[Done] = {
-    val q = tasksDispatches.map(_.dispatchedAt) += now
-    db.run(q).map(_ => Done)
-  }
-
-
 }

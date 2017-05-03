@@ -19,7 +19,7 @@ class HomeController : Controller() {
     lateinit var tabLayout:TabLayout
 
     val pagerAdapter : PagerAdapter = object: RouterPagerAdapter(this) {
-        val tabs = listOf("tasks" to TasksController(),"chores" to ChoresController())
+        val tabs = listOf("tasks" to TasksController(),"chores" to ChoresController(),"penalties" to PenaltiesController())
 
         override fun getCount(): Int {
             return tabs.size

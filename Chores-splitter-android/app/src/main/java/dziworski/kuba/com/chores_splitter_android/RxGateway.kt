@@ -24,6 +24,7 @@ object RxGateway {
 
     private val choresChanged: PublishProcessor<Unit> = PublishProcessor.create<Unit>()
     private val tasksChanged: PublishProcessor<Unit> = PublishProcessor.create<Unit>()
+    private val penaltesChanged: PublishProcessor<Unit> = PublishProcessor.create<Unit>()
     val choresFlowable: Flowable<GetChoresDto> = tick
             .mergeWith(choresChanged)
             .flatMap { backend.getChores() }
@@ -38,6 +39,10 @@ object RxGateway {
             .flatMap { backend.getTasks() }
             .subOnIoObservOnMainWithErrorHandling()
 
+    val penaltiesFlowable = tick
+            .mergeWith { penaltesChanged }
+            .flatMap { backend.getPenalties() }
+            .subOnIoObservOnMainWithErrorHandling()
 
     fun addChore(chore: AddChoreDto) {
         backend.addChore(chore)
@@ -54,7 +59,13 @@ object RxGateway {
     fun addTask(task: AddTaskDto) {
         backend.addTask(task)
                 .subOnIoWithErrorHandling()
-                .subscribe{ tasksChanged.onNext(Unit) }
+                .subscribe { tasksChanged.onNext(Unit) }
+    }
+
+    fun addPenalty(penaltyDto: AddPenaltyDto) {
+        backend.addPenalty(penaltyDto)
+                .subOnIoWithErrorHandling()
+                .subscribe { penaltesChanged.onNext(Unit) }
     }
 
     fun setTaskCompleted(completed: Boolean, taskId: Long) {
@@ -68,20 +79,20 @@ object RxGateway {
                 .subscribe { tasksChanged.onNext(Unit) }
     }
 
-    fun <T> Flowable<T>.subOnIoObservOnMainWithErrorHandling() : Flowable<T> {
+    fun <T> Flowable<T>.subOnIoObservOnMainWithErrorHandling(): Flowable<T> {
         return this
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .withErrorHandling()
     }
 
-    fun <T> Flowable<T>.subOnIoWithErrorHandling() : Flowable<T> {
+    fun <T> Flowable<T>.subOnIoWithErrorHandling(): Flowable<T> {
         return this
                 .subscribeOn(Schedulers.io())
                 .withErrorHandling()
     }
 
-    fun <T> Flowable<T>.withErrorHandling() : Flowable<T> {
+    fun <T> Flowable<T>.withErrorHandling(): Flowable<T> {
         return this.retry { exception: Throwable ->
             Log.e(RxGateway::class.toString(), exception.stackTrace.joinToString("\n"))
             Toast.makeText(

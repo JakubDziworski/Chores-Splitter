@@ -21,7 +21,7 @@ trait AppLoader {
     override val tasksService: TasksService = tService
     override val penaltiesService : PenaltyService = pService
   }
-  lazy val taskDispatcher = new TasksDispatcher(tService)
+  lazy val taskDispatcher = new TasksDispatcherService(db,uService,chService,tService)
 
   def dbSetup() = {
     import slick.jdbc.H2Profile.api._

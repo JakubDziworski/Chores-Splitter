@@ -17,6 +17,7 @@ class ChoresService(db: Database)(implicit clock: Clock = Clock.systemUTC()) {
 
   private val AutoInc = 0
   val chores = Tables.Chores
+  val tasks = Tables.Tasks
 
   def addChore(addChoreDto: AddChoreDto): Future[ChoreId] = {
     val row = {
@@ -62,6 +63,22 @@ class ChoresService(db: Database)(implicit clock: Clock = Clock.systemUTC()) {
       ch <- chores if ch.choreId === chId
     } yield ch
 
+    db.run(q.result).map(_.map(_.toDto).toList).map(GetChoresDto)
+  }
+
+  def getChoresAfterInterval(): Future[GetChoresDto] = {
+    def milisSinceCompletion(tasks: Tables.Tasks): Rep[Long] = {
+      valueToConstColumn(now) - tasks.completedAt.getOrElse(Long.MaxValue)
+    }
+
+    def toMilis(days: Rep[Int]): Rep[Int] = {
+      days * (24 * 60 * 60 * 1000)
+    }
+
+    val q = for {
+      ch <- chores
+      t <- tasks if (t.choreId === ch.choreId && milisSinceCompletion(t) < ch.interval.getOrElse(0).asColumnOf[Long])
+    } yield ch
     db.run(q.result).map(_.map(_.toDto).toList).map(GetChoresDto)
   }
 

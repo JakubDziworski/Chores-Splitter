@@ -14,11 +14,9 @@ import io.reactivex.rxkotlin.subscribeBy
 class TasksController : Controller() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
         val view = inflater.inflate(R.layout.controller_tasks, container, false)
-
         val taskListControllerContainer = view.findViewById(R.id.tasks_list_container) as ViewGroup
         val tasksListRouter = getChildRouter(taskListControllerContainer);
         val addTaskBtn = view.findViewById(R.id.add_task_btn) as ImageButton
-
         val usersControllerContainer = view.findViewById(R.id.tasks_users_controller) as ViewGroup
         val usersRouter = getChildRouter(usersControllerContainer);
         val usersController = UsersController()

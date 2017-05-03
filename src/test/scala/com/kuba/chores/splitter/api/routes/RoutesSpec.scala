@@ -11,31 +11,18 @@ import com.kuba.chords.splitter.api.routes.dto.JsonSupport
 import com.kuba.chords.splitter.api.routes.dto.PenaltyDtos.{AddPenaltyDto, GetPenaltiesDto, GetPenaltyDto, PenaltyId}
 import com.kuba.chords.splitter.api.routes.dto.TaskDtos._
 import com.kuba.chords.splitter.api.routes.dto.UserDtos._
-import com.kuba.chords.splitter.service.{ChoresService, PenaltyService, TasksService, UsersService}
-import com.kuba.chores.splitter.util.DbSetUp
+import com.kuba.chords.splitter.service._
+import com.kuba.chores.splitter.util.{DbSetUp, TestHelpers}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpec}
 
-class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteTest with JsonSupport with AppConfig with BeforeAndAfterEach with DbSetUp with MockFactory {
+class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteTest with JsonSupport with AppConfig with BeforeAndAfterEach with DbSetUp with MockFactory with TestHelpers {
   val ApiPrefix = "/api/v1"
-
-  val clockMock = mock[Clock]
 
   override val choresService = new ChoresService(db)(clockMock)
   override val usersService = new UsersService(db)
   override val tasksService = new TasksService(db)(clockMock)
   override val penaltiesService = new PenaltyService(db)(clockMock)
-
-
-  "dupa" should {
-    "fds" in {
-      setTime(50001024)
-      println(tasksService.getUsersPoints())
-      println(tasksService.getChoresAfterInterval())
-      println(tasksService.getLastTaskDispatch())
-      println(tasksService.getLastTaskDispatch())
-    }
-  }
 
   "POST /chores" should {
     "Add new Chore" in {
@@ -211,7 +198,7 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
 
   "POST and GET /penalties" should {
     "add and return penalties" in {
-      val userId = addUser().userId
+      val userId = addUser("john","john@gmail.com").userId
       Post(s"$ApiPrefix/penalties",AddPenaltyDto(userId,10,"did not sweep")) ~> routes ~> check {
         responseAs[PenaltyId] shouldBe PenaltyId(1)
       }
@@ -221,10 +208,6 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
         ))
       }
     }
-  }
-
-  private def setTime(time: Long): Any = {
-    (clockMock.instant _).expects().anyNumberOfTimes.returning(Instant.ofEpochMilli(time))
   }
 
   def addChore(name: String = "dust off", points: Int = 10, interval: Option[Int] = Some(5)): ChoreId = {

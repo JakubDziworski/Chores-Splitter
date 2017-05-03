@@ -3,32 +3,49 @@ package com.kuba.chords.splitter.service
 import java.time.Clock
 
 import akka.Done
-import akka.actor.Actor
 import com.kuba.chords.splitter.api.routes.dto.ChoreDtos.ChoreId
 import com.kuba.chords.splitter.api.routes.dto.TaskDtos.AddTaskDto
 import com.kuba.chords.splitter.api.routes.dto.{ChoreDtos, UserPoint}
-import com.kuba.chords.splitter.service.TasksDispatcher.Check
 import com.kuba.chords.splitter.util.TimeUtil._
+import com.kuba.dziworski.chords.splitter.slick.Tables
+import slick.jdbc.H2Profile.api._
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
-class TasksDispatcher(tasksService: TasksService) {
+class TasksDispatcherService(db: Database,
+                             usersService: UsersService,
+                             choresService: ChoresService,
+                             tasksService: TasksService
+                            )(implicit clock: Clock = Clock.systemUTC) {
 
-  def dispatch() : Future[Done] = {
-      //TODO transactionally!
-      for {
-        lastDispatch <- tasksService.getLastTaskDispatch()
-        choresForToday <- tasksService.getChoresAfterInterval() if isOutdated(lastDispatch)
-        points <- tasksService.getUsersPoints()
-        newTasks <- tasksService.addTasks(TasksDispatcher.assignTasksForToday(points, choresForToday.chores))
-        lastDispatchUpdate <- tasksService.updateLastTaskDispatch()
-      } yield lastDispatchUpdate
+  val tasksDispatches = Tables.TasksDispatches
+  val users = Tables.Users
+
+  def dispatch(): Future[Done] = {
+    //TODO transactionally!
+    for {
+      lastDispatch <- getLastTaskDispatch
+      choresForToday <- choresService.getChoresAfterInterval() if isOutdated(lastDispatch)
+      points <- usersService.getUsersPoints()
+      newTasks <- tasksService.addTasks(TasksDispatcherService.assignTasksForToday(points, choresForToday.chores))
+      lastDispatchUpdate <- updateLastTaskDispatch()
+    } yield lastDispatchUpdate
+  }
+
+  def getLastTaskDispatch: Future[Long] = {
+    val q = tasksDispatches.sortBy(_.id.desc).map(_.dispatchedAt)
+    db.run(q.result.headOption).map(_.getOrElse(0))
+  }
+
+  def updateLastTaskDispatch(): Future[Done] = {
+    val q = tasksDispatches.map(_.dispatchedAt) += now
+    db.run(q).map(_ => Done)
   }
 }
 
 
-object TasksDispatcher {
+object TasksDispatcherService {
 
   case object Check
 

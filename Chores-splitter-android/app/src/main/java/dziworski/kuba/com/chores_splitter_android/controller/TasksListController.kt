@@ -11,9 +11,7 @@ import android.widget.TextView
 import com.bluelinelabs.conductor.Controller
 import dziworski.kuba.com.chores_splitter_android.R
 import dziworski.kuba.com.chores_splitter_android.RxGateway
-import dziworski.kuba.com.chores_splitter_android.http.GetChoreDto
 import dziworski.kuba.com.chores_splitter_android.http.GetTaskDto
-import dziworski.kuba.com.chores_splitter_android.http.GetUserDto
 import io.reactivex.rxkotlin.subscribeBy
 
 class TasksListController : Controller {
