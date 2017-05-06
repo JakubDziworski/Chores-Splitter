@@ -52,8 +52,9 @@ lazy val slickCodeGenTask = (sourceManaged, dependencyClasspath in Compile, runn
   val url = "jdbc:h2:mem:test2;INIT=runscript from 'src/main/resources/db/migration/V1__Chores_Splitter.sql'"
   val jdbcDriver = "org.h2.Driver"
   val slickDriver = "slick.jdbc.H2Profile"
-  val pkg = "com.kuba.dziworski.chords.splitter.slick"
+  val pkg = "com.kuba.dziworski.chores.splitter"
   toError(r.run("slick.codegen.SourceCodeGenerator", cp.files, Array(slickDriver, jdbcDriver, url, outputDir, pkg), s.log))
-  val fname = outputDir + "/com/kuba/dziworski/chords/splitter/slick/Tables.scala"
+  val fname = outputDir + "/com/kuba/dziworski/chores/splitter/Tables.scala"
   Seq(file(fname))
 }
+parallelExecution in Test := false
