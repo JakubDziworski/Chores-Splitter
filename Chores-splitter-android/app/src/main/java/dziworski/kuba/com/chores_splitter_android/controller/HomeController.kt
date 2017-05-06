@@ -39,6 +39,7 @@ class HomeController : Controller() {
         viewPager = view.findViewById(R.id.main_view_pager) as ViewPager
         tabLayout = view.findViewById(R.id.main_tab_layout) as TabLayout
         viewPager.setAdapter(pagerAdapter)
+        viewPager.offscreenPageLimit = pagerAdapter.count
         tabLayout.setupWithViewPager(viewPager)
         return view
     }
