@@ -1,5 +1,6 @@
 package com.kuba.chords.splitter.service
 
+import com.kuba.chords.splitter.api.routes.dto.RowConversions._
 import com.kuba.chords.splitter.api.routes.dto.UserDtos._
 import com.kuba.dziworski.chords.splitter.slick.Tables
 import com.kuba.dziworski.chords.splitter.slick.Tables.UsersRow
@@ -7,8 +8,6 @@ import slick.jdbc.H2Profile.api._
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
-import com.kuba.chords.splitter.api.routes.dto.RowConversions._
-import com.kuba.chords.splitter.api.routes.dto.UserPoint
 
 class UsersService(db: Database) {
   private val AutoInc = 0
@@ -24,22 +23,27 @@ class UsersService(db: Database) {
   }
 
   def getUsers: Future[GetUsersDto] = {
-    val action = users.result
-    db.run(action).map(_.map(_.toDto).toList).map(GetUsersDto)
-  }
+    val completedTasksWithChores = tasks.join(chores).on((t,ch) => ch.choreId === t.choreId && t.completedAt.isDefined)
+    val usersCompletedChoresPoints = for {
+      (user,chore) <- users.joinLeft(completedTasksWithChores)
+            .on((u,tch) => u.id === tch._1.userId)
+            .map { case (user,taskWithChore) =>
+              val chore = taskWithChore.map(_._2)
+              (user,chore)
+            }
+    } yield (user,chore.map(_.points).getOrElse(0))
 
-  def getUsersPoints: Future[List[UserPoint]] = {
-    val q = (for {
-      t <- tasks
-      u <- users if t.userId === u.id && t.completedAt.isDefined
-      c <- chores if t.choreId === c.choreId
-      p <- penalties if p.userId === u.id
-    } yield (t, c, p)).groupBy(_._1.id).map { case (userId, tcp) =>
-      val sumOfAllTransactonsForUser = tcp.map(_._2.points).sum.getOrElse(0)
-      val sumOfPenaltiesForUser = tcp.map(_._3.points).sum.getOrElse(0)
-      val totalPointsForUser = sumOfAllTransactonsForUser - sumOfPenaltiesForUser
-      (userId, totalPointsForUser)
+    val userPenalties = for {
+    (user,penalty) <- users.joinLeft(penalties).on(_.id === _.userId)
+    } yield (user,penalty.map(x => valueToConstColumn(0) - x.points).getOrElse(0))
+
+    val union = usersCompletedChoresPoints unionAll userPenalties
+
+
+    val z = union.groupBy(_._1).map { case (user, userPoints) =>
+      val pointsSum = userPoints.map(_._2).sum.getOrElse(0)
+      (user,pointsSum)
     }
-    db.run(q.result).map(_.map { case (userId, points) => UserPoint(UserId(userId), points) }.toList)
+    db.run(z.result).map(_.map { case (user, points) => user.toDto(points) }.toList).map(GetUsersDto)
   }
 }

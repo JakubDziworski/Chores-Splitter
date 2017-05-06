@@ -54,8 +54,8 @@ object Backend {
                 .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                 .build()
         Retrofit.Builder()
-                .baseUrl("http://10.7.69.193:8090/api/v1/")
-//                .baseUrl("http://10.0.2.2:8090/api/v1/")
+//                .baseUrl("http://10.7.69.193:8090/api/v1/")
+                .baseUrl("http://10.0.2.2:8090/api/v1/")
                 .client(httpClient)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
@@ -64,9 +64,9 @@ object Backend {
     }
 }
 
-data class GetUserDto(val id: Long,val  name: String,val  email: String) {
+data class GetUserDto(val id: Long,val  name: String,val  email: String,val points: Int) {
     override fun toString(): String {
-        return name
+        return "$name $points points"
     }
 }
 data class UserId(val userId: Long)
@@ -79,7 +79,7 @@ data class AddChoreDto(val name: String, val points: Int, val interval: Int?)
 data class EditChoreDto(val choreId: String, val name: String, val points: Int, val interval: Int?)
 
 data class TaskId(val taskId:Long)
-data class GetTaskDto(val id: Long, val chore:GetChoreDto, val user:GetUserDto, val assignedAt: Long, val completed: Boolean)
+data class GetTaskDto(val id: Long, val chore:GetChoreDto, val userId:Long, val assignedAt: Long, val completed: Boolean)
 data class GetTasksDto(val tasks:List<GetTaskDto>)
 data class AddTaskDto(val choreId: ChoreId,val userId: UserId)
 

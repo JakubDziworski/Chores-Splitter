@@ -32,14 +32,14 @@ object UserDtos {
 
   case class AddUserDto(name: String, email: String)
 
-  case class GetUserDto(id: Long, name: String, email: String)
+  case class GetUserDto(id: Long, name: String, email: String,points:Int)
 
   case class GetUsersDto(users: List[GetUserDto])
 
   trait UserFormat extends SprayJsonSupport with DefaultJsonProtocol {
     implicit lazy val userIdFormat = jsonFormat1(UserId)
     implicit lazy val addUserDtoFormat = jsonFormat2(AddUserDto)
-    implicit lazy val getUserDtoFormat = jsonFormat3(GetUserDto)
+    implicit lazy val getUserDtoFormat = jsonFormat4(GetUserDto)
     implicit lazy val getUsersDtoFormat = jsonFormat1(GetUsersDto)
   }
 }
@@ -47,7 +47,7 @@ object UserDtos {
 object TaskDtos {
   case class TaskId(taskId:Long)
   case class AddTaskDto(choreId: ChoreId, userId: UserId)
-  case class GetTaskDto(id: Long, chore:GetChoreDto, user:GetUserDto, assignedAt: Long, completed: Boolean)
+  case class GetTaskDto(id: Long, chore:GetChoreDto, userId:Long, assignedAt: Long, completed: Boolean)
   case class GetTasksDto(tasks:List[GetTaskDto])
 
   trait TaskFormat extends SprayJsonSupport with DefaultJsonProtocol with ChoreFormat with UserFormat {
@@ -74,8 +74,8 @@ object PenaltyDtos {
 
 object RowConversions {
   implicit class UserConverter(userRow: UsersRow) {
-    def toDto : GetUserDto = {
-      GetUserDto(userRow.id,userRow.name,userRow.email)
+    def toDto(points:Int) : GetUserDto = {
+      GetUserDto(userRow.id,userRow.name,userRow.email,points)
     }
   }
 
@@ -85,12 +85,16 @@ object RowConversions {
     }
   }
 
+  implicit class ChoresConverter(choresRows: Iterable[ChoresRow]) {
+    def toDto  = GetChoresDto(choresRows.map(_.toDto).toList)
+  }
+
   implicit class TaskConverter(taskRow: TasksRow) {
-    def toDto(choreRow: ChoresRow,userRow: UsersRow): GetTaskDto = {
+    def toDto(choreRow: ChoresRow): GetTaskDto = {
       GetTaskDto(
         taskRow.id,
         choreRow.toDto,
-        userRow.toDto,
+        taskRow.userId,
         taskRow.assignedAt,
         taskRow.completedAt.isDefined
       )

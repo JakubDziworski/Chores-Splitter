@@ -1,7 +1,6 @@
 package com.kuba.chores.splitter.api.routes
 
-import java.time.{Clock, Instant}
-
+import akka.Done
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import com.kuba.chords.splitter.AppConfig
@@ -62,22 +61,22 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
   "PUT /chores/1" should {
     "edit chore returning Created with new chore id" in {
       setTime(100)
-      val dustId = addChore("dust off",5,Some(3))
-      val dto = AddChoreDto("dust off harder",7,Some(2))
-      Put(s"$ApiPrefix/chores/1",dto) ~> routes ~> check {
+      val dustId = addChore("dust off", 5, Some(3))
+      val dto = AddChoreDto("dust off harder", 7, Some(2))
+      Put(s"$ApiPrefix/chores/1", dto) ~> routes ~> check {
         responseAs[ChoreId] shouldBe ChoreId(2)
       }
     }
     "return only newest edited version of chore" in {
       setTime(100)
-      val dustId = addChore("dust off",5,Some(3))
-      val dto = AddChoreDto("dust off harder",7,None)
-      Put(s"$ApiPrefix/chores/1",dto) ~> routes ~> check {
+      val dustId = addChore("dust off", 5, Some(3))
+      val dto = AddChoreDto("dust off harder", 7, None)
+      Put(s"$ApiPrefix/chores/1", dto) ~> routes ~> check {
         responseAs[ChoreId] shouldBe ChoreId(2)
       }
       getChores shouldBe GetChoresDto(List(
         GetChoreDto(
-          2,"dust off harder",7,None
+          2, "dust off harder", 7, None
         )
       ))
     }
@@ -86,23 +85,23 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
   "GET /tasks" should {
     "return all tasks" in {
       setTime(100)
-      val mark = addUser("mark","mark@gmail.com")
-      val andrew = addUser("andrew","andrew@gmail.com")
-      val sweep = addChore("sweep",5,Some(3))
-      val markSweepTask = addTask(mark,sweep)
-      val andrewSweepTask = addTask(andrew,sweep)
+      val mark = addUser("mark", "mark@gmail.com")
+      val andrew = addUser("andrew", "andrew@gmail.com")
+      val sweep = addChore("sweep", 5, Some(3))
+      val markSweepTask = addTask(mark, sweep)
+      val andrewSweepTask = addTask(andrew, sweep)
       Get(s"$ApiPrefix/tasks") ~> routes ~> check {
         responseAs[GetTasksDto] shouldBe GetTasksDto(List(
           GetTaskDto(
             markSweepTask.taskId,
             GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
-            GetUserDto(mark.userId, "mark", "mark@gmail.com"),
+            mark.userId,
             100,
             completed = false),
           GetTaskDto(
             andrewSweepTask.taskId,
             GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
-            GetUserDto(andrew.userId, "andrew", "andrew@gmail.com"),
+            andrew.userId,
             100,
             completed = false)
         ))
@@ -113,9 +112,9 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
   "PUT /tasks/1/set-completed" should {
     "mark task 1 as completed" in {
       setTime(200)
-      val andrew = addUser("andrew","andrew@gmail.com")
-      val sweep = addChore("sweep",5,Some(3))
-      val andrewSweepTask = addTask(andrew,sweep)
+      val andrew = addUser("andrew", "andrew@gmail.com")
+      val sweep = addChore("sweep", 5, Some(3))
+      val andrewSweepTask = addTask(andrew, sweep)
       Put(s"$ApiPrefix/tasks/1/set-completed") ~> routes ~> check {
         status shouldBe StatusCodes.OK
       }
@@ -123,7 +122,7 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
         GetTaskDto(
           1,
           GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
-          GetUserDto(1, "andrew", "andrew@gmail.com"),
+          1,
           200,
           completed = true)
       ))
@@ -133,9 +132,9 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
   "PUT /tasks/1/set-uncompleted" should {
     "mark task 1 as uncompleted" in {
       setTime(200)
-      val andrew = addUser("andrew","andrew@gmail.com")
-      val sweep = addChore("sweep",5,Some(3))
-      val andrewSweepTask = addTask(andrew,sweep)
+      val andrew = addUser("andrew", "andrew@gmail.com")
+      val sweep = addChore("sweep", 5, Some(3))
+      val andrewSweepTask = addTask(andrew, sweep)
       Put(s"$ApiPrefix/tasks/1/set-completed") ~> routes ~> check {
         status shouldBe StatusCodes.OK
       }
@@ -143,7 +142,7 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
         GetTaskDto(
           1,
           GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
-          GetUserDto(1, "andrew", "andrew@gmail.com"),
+          1,
           200,
           completed = true)
       ))
@@ -154,7 +153,7 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
         GetTaskDto(
           1,
           GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
-          GetUserDto(1, "andrew", "andrew@gmail.com"),
+          1,
           200,
           completed = false)
       ))
@@ -164,17 +163,17 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
   "GET /tasks/user/1" should {
     "return users' tasks" in {
       setTime(100)
-      val andrew = addUser("andrew","andrew@gmail.com")
-      val john = addUser("john","john@gmail.com")
-      val sweep = addChore("sweep",5,Some(3))
-      val andrewSweepTask = addTask(andrew,sweep)
-      val johnSweepTask = addTask(john,sweep)
+      val andrew = addUser("andrew", "andrew@gmail.com")
+      val john = addUser("john", "john@gmail.com")
+      val sweep = addChore("sweep", 5, Some(3))
+      val andrewSweepTask = addTask(andrew, sweep)
+      val johnSweepTask = addTask(john, sweep)
       Get(s"$ApiPrefix/tasks/user/${andrewSweepTask.taskId}") ~> routes ~> check {
         responseAs[GetTasksDto] shouldBe GetTasksDto(List(
           GetTaskDto(
             andrewSweepTask.taskId,
             GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
-            GetUserDto(andrew.userId, "andrew", "andrew@gmail.com"),
+            andrew.userId,
             100,
             completed = false))
         )
@@ -185,12 +184,25 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
   "GET /users" should {
     "return users" in {
       setTime(100)
-      addUser("john","john@gmail.com")
-      addUser("stefan","stefan@gmail.com")
+      val johnId = addUser("john", "john@gmail.com")
+      val stefanId = addUser("stefan", "stefan@gmail.com")
+      val fivePointChore = addChore(points = 5)
+      val tenPointChore = addChore(points = 10)
+      val fifteenPointChore = addChore(points = 15)
+      completeTask(addTask(johnId, fivePointChore))
+      completeTask(addTask(johnId, fifteenPointChore))
+      addPenalty(johnId, 1)
+      addPenalty(johnId, 1)
+      val expectedJohnPoints = 5 + 15 - 1 - 1
+      completeTask(addTask(stefanId, tenPointChore))
+      completeTask(addTask(stefanId, fifteenPointChore))
+      addPenalty(stefanId, 2)
+      addPenalty(stefanId, 3)
+      val expectedStefanPoints = 10 + 15 - 2 - 3
       Get(s"$ApiPrefix/users") ~> routes ~> check {
         responseAs[GetUsersDto] shouldBe GetUsersDto(List(
-          GetUserDto(1, "john", "john@gmail.com"),
-          GetUserDto(2, "stefan", "stefan@gmail.com")
+          GetUserDto(1, "john", "john@gmail.com", expectedJohnPoints),
+          GetUserDto(2, "stefan", "stefan@gmail.com", expectedStefanPoints)
         ))
       }
     }
@@ -198,13 +210,17 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
 
   "POST and GET /penalties" should {
     "add and return penalties" in {
-      val userId = addUser("john","john@gmail.com").userId
-      Post(s"$ApiPrefix/penalties",AddPenaltyDto(userId,10,"did not sweep")) ~> routes ~> check {
+      val userId = addUser("john", "john@gmail.com").userId
+      Post(s"$ApiPrefix/penalties", AddPenaltyDto(userId, 10, "did not sweep")) ~> routes ~> check {
         responseAs[PenaltyId] shouldBe PenaltyId(1)
+      }
+      Post(s"$ApiPrefix/penalties", AddPenaltyDto(userId, 10, "did not sweep")) ~> routes ~> check {
+        responseAs[PenaltyId] shouldBe PenaltyId(2)
       }
       Get(s"$ApiPrefix/penalties") ~> routes ~> check {
         responseAs[GetPenaltiesDto] shouldBe GetPenaltiesDto(List(
-          GetPenaltyDto(1,userId,10,"did not sweep")
+          GetPenaltyDto(1, userId, 10, "did not sweep"),
+          GetPenaltyDto(2, userId, 10, "did not sweep")
         ))
       }
     }
@@ -228,9 +244,22 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
     }
   }
 
-  def addTask(userId:UserId,choreId:ChoreId): TaskId = {
-    Post(s"$ApiPrefix/tasks",AddTaskDto(choreId,userId)) ~> routes ~> check {
+  def addTask(userId: UserId, choreId: ChoreId): TaskId = {
+    Post(s"$ApiPrefix/tasks", AddTaskDto(choreId, userId)) ~> routes ~> check {
       responseAs[TaskId]
+    }
+  }
+
+  def addPenalty(userId: UserId, points: Int = 10, reason: String = "did not complete task"): PenaltyId = {
+    Post(s"$ApiPrefix/penalties", AddPenaltyDto(userId.userId, points, reason)) ~> routes ~> check {
+      responseAs[PenaltyId]
+    }
+  }
+
+  def completeTask(taskId:TaskId) = {
+    Put(s"$ApiPrefix/tasks/${taskId.taskId}/set-completed") ~> routes ~> check {
+      status shouldBe StatusCodes.OK
+      Done
     }
   }
 

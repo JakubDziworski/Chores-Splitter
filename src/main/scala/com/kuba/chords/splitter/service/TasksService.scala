@@ -29,13 +29,13 @@ class TasksService(db: Database)(implicit clock: Clock = Clock.systemUTC) {
   def now = Timestamp.from(Instant.now(clock)).getTime
 
   def addTasks(newTasks: List[AddTaskDto]): Future[List[TaskId]] = {
-    val rows = newTasks.map(dto => TasksRow(AutoInc, dto.userId.userId, dto.choreId.choreId, now, None))
+    val rows = newTasks.map(dto => TasksRow(AutoInc, dto.userId.userId, dto.choreId.choreId, now, None,None))
     val action = tasks returning tasks.map(_.id) ++= rows
     db.run(action).map(_.map(TaskId).toList)
   }
 
   def addTask(dto: AddTaskDto): Future[TaskId] = {
-    val row = TasksRow(AutoInc, dto.userId.userId, dto.choreId.choreId, now, None)
+    val row = TasksRow(AutoInc, dto.userId.userId, dto.choreId.choreId, now, None,None)
     val action = tasks returning tasks.map(_.id) += row
     db.run(action).map(TaskId)
   }
@@ -45,9 +45,9 @@ class TasksService(db: Database)(implicit clock: Clock = Clock.systemUTC) {
       ch <- chores
       t <- tasks if t.choreId === ch.choreId
       u <- users.filter(_.id === userId.userId) if t.userId === u.id
-    } yield (ch, t, u)
+    } yield (ch, t)
     db.run(query.result)
-      .map(_.map { case (chRow, tRow, uRow) => tRow.toDto(chRow, uRow) }.toList)
+      .map(_.map { case (chRow, tRow) => tRow.toDto(chRow) }.toList)
       .map(GetTasksDto)
   }
 
@@ -56,9 +56,9 @@ class TasksService(db: Database)(implicit clock: Clock = Clock.systemUTC) {
       ch <- chores
       t <- tasks if t.choreId === ch.choreId
       u <- users if t.userId === u.id
-    } yield (ch, t, u)
+    } yield (ch, t)
     db.run(query.result)
-      .map(_.map { case (chRow, tRow, uRow) => tRow.toDto(chRow, uRow) }.toList)
+      .map(_.map { case (chRow, tRow) => tRow.toDto(chRow) }.toList)
       .map(GetTasksDto)
   }
 

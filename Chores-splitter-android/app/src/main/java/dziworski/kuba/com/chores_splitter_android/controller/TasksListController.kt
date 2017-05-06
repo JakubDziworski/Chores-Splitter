@@ -36,7 +36,7 @@ class TasksListController : Controller {
         init {
             RxGateway
                     .tasksFlowable
-                    .map { it.tasks.filter { it.user.id == userId } }
+                    .map { it.tasks.filter { it.userId == userId } }
                     .subscribeBy (
                             onNext = {
                                 items = it
