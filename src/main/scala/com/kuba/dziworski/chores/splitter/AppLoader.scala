@@ -26,8 +26,8 @@ trait AppLoader {
   def dbSetup() = {
     import slick.jdbc.H2Profile.api._
     val flyway = new Flyway
-    flyway.setDataSource("jdbc:h2:mem:chore_splitter;DB_CLOSE_DELAY=-1;MODE=PostgreSQL", "SA", "")
-    val db = Database.forDataSource(flyway.getDataSource(), None)
+    flyway.setDataSource(appConfig.jdbcUrl, appConfig.jdbcUser, appConfig.jdbcPassword)
+    val db = Database.forURL(appConfig.jdbcUrl,appConfig.jdbcUser,appConfig.jdbcPassword)
     flyway.migrate()
     db
   }

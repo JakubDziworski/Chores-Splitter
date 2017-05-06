@@ -14,7 +14,7 @@ val slickV = "3.2.0"
 val dbDeps = Seq (
   "com.typesafe.slick" %% "slick" % slickV,
   "com.typesafe.slick" %% "slick-codegen" % slickV,
-  "com.h2database" % "h2" % "1.4.191",
+  "com.h2database" % "h2" % "1.4.195",
   "org.flywaydb" % "flyway-core" % "3.2.1"
 )
 
