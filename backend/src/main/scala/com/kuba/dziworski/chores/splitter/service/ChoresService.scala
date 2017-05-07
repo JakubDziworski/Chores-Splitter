@@ -14,7 +14,6 @@ import scala.concurrent.Future
 
 class ChoresService(db: Database)(implicit clock: Clock = Clock.systemUTC()) {
 
-  private val AutoInc = 0
   val chores = Tables.Chores
   val tasks = Tables.Tasks
 
@@ -39,15 +38,15 @@ class ChoresService(db: Database)(implicit clock: Clock = Clock.systemUTC()) {
         .result.head
     }
 
-    def insert(srcChoreId: Long) = {
-      val columns = chores.map(c => (c.srcChoreId, c.name, c.points, c.createdAt, c.interval))
-      val row = (srcChoreId, dto.name, dto.points, now, dto.interval)
-      columns returning chores.map(_.choreId) += row
+    def insert(srcChoreId: Long,length:Long) = {
+      val row = ChoresRow(length+1,srcChoreId, now,dto.name, dto.points, dto.interval)
+      chores returning chores.map(_.choreId) += row
     }
 
     val action = for {
       srcChore <- querySrcChoreId
-      newChoreId <- insert(srcChore)
+      length <- chores.length.result
+      newChoreId <- insert(srcChore,length)
     } yield newChoreId
 
     db.run(action).map(ChoreId)
