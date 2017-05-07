@@ -24,8 +24,8 @@ class ChoresService(db: Database)(implicit clock: Clock = Clock.systemUTC()) {
 
     val action = for {
       r <- row
-      insertedId <- chores returning chores.map(_.choreId) forceInsert r
-    } yield insertedId
+      _ <- chores forceInsert r
+    } yield r.choreId
 
     db.run(action).map(id => ChoreId(id))
   }
@@ -38,16 +38,16 @@ class ChoresService(db: Database)(implicit clock: Clock = Clock.systemUTC()) {
         .result.head
     }
 
-    def insert(srcChoreId: Long,length:Long) = {
-      val row = ChoresRow(length+1,srcChoreId, now,dto.name, dto.points, dto.interval)
-      chores returning chores.map(_.choreId) += row
+    def insert(srcChoreId: Long,newId:Long) = {
+      val row = ChoresRow(newId,srcChoreId, now,dto.name, dto.points, dto.interval)
+      chores += row
     }
 
     val action = for {
       srcChore <- querySrcChoreId
-      length <- chores.length.result
-      newChoreId <- insert(srcChore,length)
-    } yield newChoreId
+      newId <- (chores.length.asColumnOf[Long]+1L).result
+      _ <- insert(srcChore,newId)
+    } yield newId
 
     db.run(action).map(ChoreId)
   }

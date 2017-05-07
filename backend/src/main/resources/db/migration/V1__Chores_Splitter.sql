@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users
 
 CREATE TABLE IF NOT EXISTS chores
 (
-  chore_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  chore_id BIGINT PRIMARY KEY,
   src_chore_id BIGINT NOT NULL REFERENCES chores(chore_id),
   created_at BIGINT NOT NULL,
   name VARCHAR NOT NULL,
