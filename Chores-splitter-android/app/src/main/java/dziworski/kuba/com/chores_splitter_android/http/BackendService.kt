@@ -24,10 +24,10 @@ interface BackendService {
     fun getTasksForUser(@Path("userId")userId:String) : Flowable<GetTasksDto>
 
     @PUT("tasks/{taskId}/set-completed")
-    fun completeTask(@Path("taskId")taskId:String) : Flowable<Void>
+    fun completeTask(@Path("taskId")taskId:String) : Flowable<String>
 
     @PUT("tasks/{taskId}/set-uncompleted")
-    fun unCompleteTask(@Path("taskId")taskId:String) : Flowable<Void>
+    fun unCompleteTask(@Path("taskId")taskId:String) : Flowable<String>
 
     @GET("chores")
     fun getChores() : Flowable<GetChoresDto>
@@ -54,8 +54,8 @@ object Backend {
                 .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                 .build()
         Retrofit.Builder()
-//                .baseUrl("http://10.7.69.193:8090/api/v1/")
-                .baseUrl("http://10.0.2.2:8090/api/v1/")
+                .baseUrl("http://10.7.69.193:8090/api/v1/")
+//                .baseUrl("http://10.0.2.2:8090/api/v1/")
                 .client(httpClient)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())

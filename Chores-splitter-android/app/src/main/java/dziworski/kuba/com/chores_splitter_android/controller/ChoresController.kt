@@ -19,6 +19,7 @@ class ChoresController : Controller() {
     private lateinit var recyclerView : RecyclerView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
+        retainViewMode = RetainViewMode.RETAIN_DETACH
         val root = inflater.inflate(R.layout.controller_chores, container, false) as ViewGroup
         setupAddChoreBtn(root)
         recyclerView = root.findViewById(R.id.chores_recycler_view) as RecyclerView

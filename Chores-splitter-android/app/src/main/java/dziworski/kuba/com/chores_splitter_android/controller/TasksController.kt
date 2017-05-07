@@ -13,6 +13,7 @@ import io.reactivex.rxkotlin.subscribeBy
 
 class TasksController : Controller() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
+        retainViewMode = RetainViewMode.RETAIN_DETACH
         val view = inflater.inflate(R.layout.controller_tasks, container, false)
         val taskListControllerContainer = view.findViewById(R.id.tasks_list_container) as ViewGroup
         val tasksListRouter = getChildRouter(taskListControllerContainer).setPopsLastView(true)

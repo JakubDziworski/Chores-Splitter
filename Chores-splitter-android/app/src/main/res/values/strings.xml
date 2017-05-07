@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Chores-splitter-android</string>
+    <string name="app_name">Chores Splitter</string>
 
     <!-- Transitions -->
     <string name="fab_dialog_transition_name">transition.fab</string>

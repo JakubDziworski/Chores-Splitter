@@ -1,5 +1,6 @@
 package dziworski.kuba.com.chores_splitter_android
 
+import android.os.Handler
 import android.util.Log
 import android.widget.Toast
 import dziworski.kuba.com.chores_splitter_android.http.*
@@ -18,29 +19,36 @@ object RxGateway {
     var tickEnabled = true
 
     private val tick: Flowable<Unit> = Flowable
-            .interval(0, 2, TimeUnit.SECONDS)
-            .map { it -> Unit }
+            .interval(0, 30, TimeUnit.SECONDS)
+            .map { Unit }
             .filter { tickEnabled }
 
     private val choresChanged: PublishProcessor<Unit> = PublishProcessor.create<Unit>()
     private val tasksChanged: PublishProcessor<Unit> = PublishProcessor.create<Unit>()
     private val penaltesChanged: PublishProcessor<Unit> = PublishProcessor.create<Unit>()
+    private val usersChanged: PublishProcessor<Unit> = PublishProcessor.create<Unit>()
+    private val errorOccurred = PublishProcessor.create<Throwable>()
+
+    val errorsFlowable: Flowable<Throwable> = errorOccurred
+            .observeOn(AndroidSchedulers.mainThread())
+
     val choresFlowable: Flowable<GetChoresDto> = tick
             .mergeWith(choresChanged)
             .flatMap { backend.getChores() }
             .subOnIoObservOnMainWithErrorHandling()
 
     val usersFlowable = tick
+            .mergeWith(usersChanged)
             .flatMap { backend.getUsers() }
             .subOnIoObservOnMainWithErrorHandling()
 
     val tasksFlowable = tick
-            .mergeWith { tasksChanged }
+            .mergeWith(tasksChanged)
             .flatMap { backend.getTasks() }
             .subOnIoObservOnMainWithErrorHandling()
 
     val penaltiesFlowable = tick
-            .mergeWith { penaltesChanged }
+            .mergeWith(penaltesChanged)
             .flatMap { backend.getPenalties() }
             .subOnIoObservOnMainWithErrorHandling()
 
@@ -65,7 +73,10 @@ object RxGateway {
     fun addPenalty(penaltyDto: AddPenaltyDto) {
         backend.addPenalty(penaltyDto)
                 .subOnIoWithErrorHandling()
-                .subscribe { penaltesChanged.onNext(Unit) }
+                .subscribe {
+                    penaltesChanged.onNext(Unit)
+                    usersChanged.onNext(Unit)
+                }
     }
 
     fun setTaskCompleted(completed: Boolean, taskId: Long) {
@@ -76,7 +87,10 @@ object RxGateway {
         }
         httpCallFlowable
                 .subOnIoWithErrorHandling()
-                .subscribe { tasksChanged.onNext(Unit) }
+                .subscribe {
+                    tasksChanged.onNext(Unit)
+                    usersChanged.onNext(Unit)
+                }
     }
 
     fun <T> Flowable<T>.subOnIoObservOnMainWithErrorHandling(): Flowable<T> {
@@ -93,14 +107,9 @@ object RxGateway {
     }
 
     fun <T> Flowable<T>.withErrorHandling(): Flowable<T> {
-        return this.retry { exception: Throwable ->
-            Log.e(RxGateway::class.toString(), exception.stackTrace.joinToString("\n"))
-            Toast.makeText(
-                    ChoresSplitterApp.instance,
-                    "NETWORK ERROR $exception",
-                    Toast.LENGTH_SHORT)
-                    .show()
-            false
-        }
+        return this.onErrorResumeNext{ throwable: Throwable ->
+                    errorOccurred.onNext(throwable)
+                    Flowable.empty<T>()
+                }
     }
 }
