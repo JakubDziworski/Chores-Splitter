@@ -60,7 +60,8 @@ class EditChoreController : ChoresEditorController {
             return bundle.getInt(CHORE_POINTS_KEY)
         }
         fun getChoreInterval(bundle: Bundle): Int? {
-            return bundle.getInt(CHORE_INTERVAL_KEY)
+            val interval = bundle.getInt(CHORE_INTERVAL_KEY)
+            return if (interval < 1) null else interval
         }
 
     }
