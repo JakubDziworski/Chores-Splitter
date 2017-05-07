@@ -15,7 +15,7 @@ object Main extends AppLoader {
       override def run() = taskDispatcher.dispatch()
     })
 
-    StdIn.readLine()
-    bindingFuture.flatMap(_.unbind()).onComplete(_ => system.terminate())
+//    StdIn.readLine()
+//    bindingFuture.flatMap(_.unbind()).onComplete(_ => system.terminate())
   }
 }
