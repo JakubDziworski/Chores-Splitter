@@ -1,6 +1,7 @@
 package dziworski.kuba.com.chores_splitter_android.http
 
 import android.util.Log
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -24,10 +25,10 @@ interface BackendService {
     fun getTasksForUser(@Path("userId")userId:String) : Flowable<GetTasksDto>
 
     @PUT("tasks/{taskId}/set-completed")
-    fun completeTask(@Path("taskId")taskId:String) : Flowable<String>
+    fun completeTask(@Path("taskId")taskId:String) : Completable
 
     @PUT("tasks/{taskId}/set-uncompleted")
-    fun unCompleteTask(@Path("taskId")taskId:String) : Flowable<String>
+    fun unCompleteTask(@Path("taskId")taskId:String) : Completable
 
     @GET("chores")
     fun getChores() : Flowable<GetChoresDto>

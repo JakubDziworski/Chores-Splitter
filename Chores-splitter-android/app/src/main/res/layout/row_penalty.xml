@@ -5,7 +5,7 @@
     android:layout_marginBottom="@dimen/row_spacing"
     android:orientation="horizontal"
     android:gravity="center"
-    android:background="@android:color/holo_green_dark">
+    android:background="@color/colorPenalty">
 
     <TextView
         android:layout_marginLeft="25dp"

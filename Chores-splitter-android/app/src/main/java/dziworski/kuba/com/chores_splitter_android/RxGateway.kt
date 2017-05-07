@@ -1,8 +1,5 @@
 package dziworski.kuba.com.chores_splitter_android
 
-import android.os.Handler
-import android.util.Log
-import android.widget.Toast
 import dziworski.kuba.com.chores_splitter_android.http.*
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -80,14 +77,18 @@ object RxGateway {
     }
 
     fun setTaskCompleted(completed: Boolean, taskId: Long) {
-        val httpCallFlowable = if (completed) {
+        val callCompletable = if (completed) {
             backend.completeTask(taskId.toString())
         } else {
             backend.unCompleteTask(taskId.toString())
         }
-        httpCallFlowable
-                .subOnIoWithErrorHandling()
-                .subscribe {
+        callCompletable
+                .subscribeOn(Schedulers.io())
+                .doOnError{ throwable: Throwable ->
+                    errorOccurred.onNext(throwable)
+                }
+                .onErrorComplete()
+                .subscribe{
                     tasksChanged.onNext(Unit)
                     usersChanged.onNext(Unit)
                 }

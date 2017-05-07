@@ -6,7 +6,7 @@
     android:gravity="center"
     android:layout_height="@dimen/row_height"
     android:layout_marginBottom="@dimen/row_spacing"
-    android:background="@android:color/holo_orange_light">
+    android:background="@color/colorChore">
 
     <View
         android:layout_width="0dp"
