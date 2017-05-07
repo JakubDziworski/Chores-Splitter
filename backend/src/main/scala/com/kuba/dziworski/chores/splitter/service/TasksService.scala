@@ -2,17 +2,16 @@ package com.kuba.dziworski.chores.splitter.service
 
 import java.sql.Timestamp
 import java.time.{Clock, Instant}
-import java.util.concurrent.TimeUnit
 
 import akka.Done
-import com.kuba.dziworski.chores.splitter.api.routes.dto.ChoreDtos.GetChoresDto
-import com.kuba.dziworski.chores.splitter.api.routes.dto.TaskDtos.{AddTaskDto, GetTaskDto, GetTasksDto, TaskId}
-import com.kuba.dziworski.chores.splitter.api.routes.dto.UserDtos.UserId
 import com.kuba.dziworski.chores.splitter.Tables
-import com.kuba.dziworski.chores.splitter.Tables.{ChoresRow, TasksRow, UsersRow}
-import slick.jdbc.H2Profile.api._
+import com.kuba.dziworski.chores.splitter.Tables.TasksRow
 import com.kuba.dziworski.chores.splitter.api.routes.dto.RowConversions._
-import com.kuba.dziworski.chores.splitter.api.routes.dto.UserPoint
+import com.kuba.dziworski.chores.splitter.api.routes.dto.TaskDtos.{AddTaskDto, GetTasksDto, TaskId}
+import com.kuba.dziworski.chores.splitter.api.routes.dto.UserDtos.UserId
+import slick.jdbc.H2Profile.api._
+import com.kuba.dziworski.chores.splitter.service.Failures.TimeForTaskAlreadyEndedException
+import com.kuba.dziworski.chores.splitter.util.TimeUtil
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
@@ -65,9 +64,17 @@ class TasksService(db: Database)(implicit clock: Clock = Clock.systemUTC) {
   def setCompleted(taskId: TaskId, completed: Boolean): Future[Done] = {
     val q = for {
       t <- tasks if t.id === taskId.taskId
-    } yield t.completedAt
-    val completion = if (completed) Some(now) else None
-    db.run(q.update(completion)).map(_ => Done)
+    } yield t
+
+    db.run(q.result.head).flatMap { t =>
+      if(TimeUtil.isBeforeToday(t.assignedAt)) {
+        Future.failed(TimeForTaskAlreadyEndedException)
+      } else {
+        val completion = if (completed) Some(now) else None
+        val update = q.map(_.completedAt).update(completion)
+        db.run(update).map(_ => Done)
+      }
+    }
   }
 
 }

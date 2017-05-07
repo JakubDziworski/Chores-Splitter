@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
     private var router: Router? = null
 
     override fun onBackPressed() {
-        if (router!!.handleBack()) {
+        if (!router!!.handleBack()) {
             super.onBackPressed()
         }
     }

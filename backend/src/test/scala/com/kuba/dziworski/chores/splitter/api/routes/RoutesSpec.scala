@@ -4,7 +4,6 @@ import akka.Done
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import com.kuba.dziworski.chores.splitter.AppConfig
-import com.kuba.dziworski.chores.splitter.api.routes.Routes
 import com.kuba.dziworski.chores.splitter.api.routes.dto.ChoreDtos._
 import com.kuba.dziworski.chores.splitter.api.routes.dto.JsonSupport
 import com.kuba.dziworski.chores.splitter.api.routes.dto.PenaltyDtos.{AddPenaltyDto, GetPenaltiesDto, GetPenaltyDto, PenaltyId}
@@ -12,6 +11,7 @@ import com.kuba.dziworski.chores.splitter.api.routes.dto.TaskDtos._
 import com.kuba.dziworski.chores.splitter.api.routes.dto.UserDtos._
 import com.kuba.dziworski.chores.splitter.service._
 import com.kuba.dziworski.chores.splitter.util.{DbSetUp, TestHelpers}
+import org.joda.time.DateTime
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpec}
 
@@ -157,6 +157,16 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
           200,
           completed = false)
       ))
+    }
+    "return BadRequest if day when task was submitted ended" in {
+      val andrew = addUser("andrew", "andrew@gmail.com")
+      val sweep = addChore("sweep", 5, Some(3))
+      val andrewSweepTask = addTask(andrew, sweep)
+      setTime(new DateTime(currentTime).plusDays(1).getMillis)
+      Put(s"$ApiPrefix/tasks/1/set-completed") ~> routes ~> check {
+        status shouldBe StatusCodes.BadRequest
+        responseAs[String] shouldBe "Cannot change completion state of task which already ended"
+      }
     }
   }
 
