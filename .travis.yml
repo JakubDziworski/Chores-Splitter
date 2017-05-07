@@ -4,3 +4,5 @@ scala:
 
 jdk:
   - oraclejdk8
+
+script: cd backend && sbt test
