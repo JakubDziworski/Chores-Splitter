@@ -4,6 +4,6 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorTask">#018286</color>
-    <color name="colorChore">#00a600</color>
-    <color name="colorPenalty">#c9010b</color>
+    <color name="colorChore">#2c592c</color>
+    <color name="colorPenalty">#8e373b</color>
 </resources>
