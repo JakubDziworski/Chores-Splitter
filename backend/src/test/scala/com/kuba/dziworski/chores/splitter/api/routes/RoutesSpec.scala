@@ -87,23 +87,23 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
   }
 
   "GET /tasks" should {
-    "return all tasks" in {
+    "return all tasks (newest first)" in {
       setTime(100)
       val mark = addUser("mark", "mark@gmail.com")
       val andrew = addUser("andrew", "andrew@gmail.com")
       val sweep = addChore("sweep", 5, Some(3))
-      val markSweepTask = addTask(mark, sweep)
       val andrewSweepTask = addTask(andrew, sweep)
+      val markSweepTask = addTask(mark, sweep)
       Get(s"$ApiPrefix/tasks") ~> routes ~> check {
         responseAs[GetTasksDto] shouldBe GetTasksDto(List(
           GetTaskDto(
-            markSweepTask.taskId,
+            2,
             GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
             mark.userId,
             100,
             completed = false),
           GetTaskDto(
-            andrewSweepTask.taskId,
+            1,
             GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
             andrew.userId,
             100,
