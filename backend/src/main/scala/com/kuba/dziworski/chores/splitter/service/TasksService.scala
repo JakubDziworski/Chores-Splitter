@@ -40,23 +40,26 @@ class TasksService(db: Database)(implicit clock: Clock = Clock.systemUTC) {
   }
 
   def getTasksForUser(userId: UserId): Future[GetTasksDto] = {
-    val query = for {
+    val q = for {
       ch <- chores
       t <- tasks if t.choreId === ch.choreId
       u <- users.filter(_.id === userId.userId) if t.userId === u.id
     } yield (ch, t)
-    db.run(query.result)
+
+    val sorted = q.sortBy(_._2.id.desc)
+    db.run(sorted.result)
       .map(_.map { case (chRow, tRow) => tRow.toDto(chRow) }.toList)
       .map(GetTasksDto)
   }
 
   def getTasks(): Future[GetTasksDto] = {
-    val query = for {
+    val q = for {
       ch <- chores
       t <- tasks if t.choreId === ch.choreId
       u <- users if t.userId === u.id
     } yield (ch, t)
-    db.run(query.result)
+    val sorted = q.sortBy(_._2.id.desc)
+    db.run(sorted.result)
       .map(_.map { case (chRow, tRow) => tRow.toDto(chRow) }.toList)
       .map(GetTasksDto)
   }

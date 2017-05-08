@@ -60,7 +60,7 @@ class ChoresService(db: Database)(implicit clock: Clock = Clock.systemUTC()) {
       chId <- newestChoresIds
       ch <- chores if ch.choreId === chId
     } yield ch
-    db.run(q.result).map(_.toDto)
+    db.run(q.sortBy(_.srcChoreId.desc).result).map(_.toDto)
   }
 
   def getChoresAfterInterval(): Future[GetChoresDto] = {

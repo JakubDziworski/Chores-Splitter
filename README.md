@@ -1,8 +1,13 @@
-# Chores-Splitter
+# Chores Splitter
 
 [![Build Status](https://travis-ci.org/JakubDziworski/Chores-Splitter.svg?branch=master)](https://travis-ci.org/JakubDziworski/Chores-Splitter)
 
-This app let's you split boring house chores between roommates in a fair way.
+This app splits boring house chores between roommates in a fair way.
+
+Add chore and decide how often it should be executed.
+Every day chores are distributed between users.
+Users gain points by completing tasks and receive penalties (negative points) for uncompleted task.
+More points => less chores for the next day.
 
 ## Backend
 ### tests

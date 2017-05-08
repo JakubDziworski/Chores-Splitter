@@ -47,9 +47,9 @@ class TasksDispatcherServiceTest extends FunSuite with Matchers with DbSetUp wit
     setTime(firstDispatchTime)
     await(taskDispatcher.dispatch()) shouldBe Dispatched
     getTasks shouldBe List(
-      (dishes, markId, firstDispatchTime, false),
+      (laundry, johnId, firstDispatchTime, false),
       (iron, markId, firstDispatchTime, false),
-      (laundry, johnId, firstDispatchTime, false)
+      (dishes, markId, firstDispatchTime, false)
     )
     getUsersPoints shouldBe List(
       (johnId, 0),
@@ -67,10 +67,10 @@ class TasksDispatcherServiceTest extends FunSuite with Matchers with DbSetUp wit
     setTime(secondDispatchTime)
     await(taskDispatcher.dispatch()) shouldBe Dispatched
     getTasks shouldBe List(
-      (dishes, markId, firstDispatchTime, true),
-      (iron, markId, firstDispatchTime, true),
+      (dishes, johnId, secondDispatchTime, false),
       (laundry, johnId, firstDispatchTime, true),
-      (dishes, johnId, secondDispatchTime, false)
+      (iron, markId, firstDispatchTime, true),
+      (dishes, markId, firstDispatchTime, true)
     )
     setCompleted(TaskId(4))
     getUsersPoints shouldBe List(
@@ -82,12 +82,12 @@ class TasksDispatcherServiceTest extends FunSuite with Matchers with DbSetUp wit
     setTime(thirdDispatchTime)
     await(taskDispatcher.dispatch()) shouldBe Dispatched
     getTasks shouldBe List(
-      (dishes, markId, firstDispatchTime, true),
-      (iron, markId, firstDispatchTime, true),
-      (laundry, johnId, firstDispatchTime, true),
-      (dishes, johnId, secondDispatchTime, true),
+      (laundry, johnId, thirdDispatchTime, false),
       (dishes, markId, thirdDispatchTime, false),
-      (laundry, johnId, thirdDispatchTime, false)
+      (dishes, johnId, secondDispatchTime, true),
+      (laundry, johnId, firstDispatchTime, true),
+      (iron, markId, firstDispatchTime, true),
+      (dishes, markId, firstDispatchTime, true)
     )
     setCompleted(TaskId(5))
     setCompleted(TaskId(6))
