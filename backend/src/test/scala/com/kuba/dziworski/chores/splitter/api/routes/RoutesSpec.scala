@@ -34,12 +34,16 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
   }
 
   "GET /chores" should {
-    "return list of chores" in {
+    "return list of chores (newest first)" in {
       setTime(100)
       addChore("dust off", 10, Some(5))
+      addChore("sweep", 3, None)
       Get(s"$ApiPrefix/chores") ~> routes ~> check {
         responseAs[GetChoresDto] shouldBe GetChoresDto(
-          List(GetChoreDto(1, "dust off", 10, Some(5)))
+          List(
+            GetChoreDto(2, "sweep", 3, None),
+            GetChoreDto(1, "dust off", 10, Some(5))
+          )
         )
       }
     }
