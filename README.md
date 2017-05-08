@@ -1,4 +1,4 @@
-# Chores-Splitter
+# Chores Splitter
 
 [![Build Status](https://travis-ci.org/JakubDziworski/Chores-Splitter.svg?branch=master)](https://travis-ci.org/JakubDziworski/Chores-Splitter)
 
