@@ -1,5 +1,7 @@
 package com.kuba.dziworski.chores.splitter
 
+import java.time.Clock
+
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.kuba.dziworski.chores.splitter.api.routes.Routes
@@ -11,6 +13,7 @@ trait AppLoader {
   implicit lazy val materializer = ActorMaterializer()
   val appConfig = new AppConfig {}
   lazy val db = dbSetup
+  implicit val clock = Clock.systemDefaultZone()
   private val chService = new ChoresService(db)
   private val uService = new UsersService(db)
   private val tService = new TasksService(db)

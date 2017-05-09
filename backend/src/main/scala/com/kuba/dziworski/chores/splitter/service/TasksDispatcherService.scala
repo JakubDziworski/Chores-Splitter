@@ -20,7 +20,7 @@ class TasksDispatcherService(db: Database,
                              choresService: ChoresService,
                              penaltyService: PenaltyService,
                              tasksService: TasksService
-                            )(implicit clock: Clock = Clock.systemDefaultZone()) {
+                            )(implicit clock: Clock) {
   val UncompletedTaskPenaltyFactor = 0.5f
   val tasksDispatches = Tables.TasksDispatches
   val users = Tables.Users
