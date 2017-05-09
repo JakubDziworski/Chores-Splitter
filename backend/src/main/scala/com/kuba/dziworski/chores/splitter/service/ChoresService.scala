@@ -12,7 +12,7 @@ import slick.jdbc.H2Profile.api._
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
-class ChoresService(db: Database)(implicit clock: Clock = Clock.systemUTC()) {
+class ChoresService(db: Database)(implicit clock: Clock) {
 
   val chores = Tables.Chores
   val tasks = Tables.Tasks

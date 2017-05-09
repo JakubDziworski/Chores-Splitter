@@ -11,7 +11,7 @@ import slick.jdbc.H2Profile.api._
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
-class PenaltyService(db: Database)(implicit clock: Clock = Clock.systemUTC()) {
+class PenaltyService(db: Database)(implicit clock: Clock) {
 
   private val AutoInc = 0
   val penalties = Tables.Penalties
