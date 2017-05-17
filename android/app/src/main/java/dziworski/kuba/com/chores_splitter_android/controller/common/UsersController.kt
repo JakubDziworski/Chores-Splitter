@@ -1,11 +1,10 @@
-package dziworski.kuba.com.chores_splitter_android.controller
+package dziworski.kuba.com.chores_splitter_android.controller.common
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.bluelinelabs.conductor.Controller
-import com.bluelinelabs.conductor.RouterTransaction
 import dziworski.kuba.com.chores_splitter_android.R
 import dziworski.kuba.com.chores_splitter_android.RxGateway
 import dziworski.kuba.com.chores_splitter_android.http.GetUserDto
@@ -18,7 +17,7 @@ class UsersController : Controller() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
         val view = inflater.inflate(R.layout.controller_users, container, false)
         usersSpinner = view.findViewById(R.id.users_spinner) as Spinner
-        val spinnerAdapter = ArrayAdapter<GetUserDto>(view.context,R.layout.support_simple_spinner_dropdown_item, mutableListOf())
+        val spinnerAdapter = ArrayAdapter<GetUserDto>(view.context, R.layout.support_simple_spinner_dropdown_item, mutableListOf())
         usersSpinner.setAdapter(spinnerAdapter)
         usersSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>) {}
@@ -28,8 +27,7 @@ class UsersController : Controller() {
                 userChangeListener(user)
             }
         }
-        RxGateway
-            .usersFlowable
+        RxGateway.usersFlowable
             .subscribeBy (
                     onNext = {
                         spinnerAdapter.clear()

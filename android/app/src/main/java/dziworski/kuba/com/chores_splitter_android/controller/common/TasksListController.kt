@@ -1,4 +1,4 @@
-package dziworski.kuba.com.chores_splitter_android.controller
+package dziworski.kuba.com.chores_splitter_android.controller.common
 
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -16,8 +16,8 @@ import io.reactivex.rxkotlin.subscribeBy
 
 class TasksListController : Controller {
 
-    constructor(userId:Long) : this(Boundles.putUserId(userId))
-    constructor(bundle:Bundle) : super(bundle)
+    constructor(userId:Long) : this(putUserId(userId))
+    constructor(bundle: Bundle) : super(bundle)
 
     private lateinit var recyclerView: RecyclerView
 
@@ -26,7 +26,7 @@ class TasksListController : Controller {
         recyclerView = view.findViewById(R.id.tasks_list_recycler_view) as RecyclerView
         recyclerView.setHasFixedSize(true)
         recyclerView.setLayoutManager(LinearLayoutManager(view.context))
-        recyclerView.adapter = TaskItemAdapter(Boundles.getUserId(args),LayoutInflater.from(applicationContext))
+        recyclerView.adapter = TaskItemAdapter(getUserId(args), LayoutInflater.from(applicationContext))
         return view
     }
 
@@ -34,8 +34,7 @@ class TasksListController : Controller {
     inner class TaskItemAdapter(val userId:Long,val inflater: LayoutInflater) : RecyclerView.Adapter<TaskItemAdapter.ViewHolder>() {
 
         init {
-            RxGateway
-                    .tasksFlowable
+            RxGateway.tasksFlowable
                     .map { it.tasks.filter { it.userId == userId } }
                     .subscribeBy (
                             onNext = {
@@ -70,7 +69,7 @@ class TasksListController : Controller {
                 pointsText.text = item.chore.points.toString() + " points"
                 completedCheckBox.isChecked = item.completed
                 completedCheckBox.setOnClickListener {
-                    RxGateway.setTaskCompleted(completedCheckBox.isChecked,item.id)
+                    RxGateway.setTaskCompleted(completedCheckBox.isChecked, item.id)
                 }
             }
         }
@@ -79,7 +78,7 @@ class TasksListController : Controller {
     companion object Boundles {
         val USER_ID_KEY = "TASK_LIST_USER_ID"
 
-        fun getUserId(bundle:Bundle): Long {
+        fun getUserId(bundle: Bundle): Long {
             return bundle.getLong(USER_ID_KEY)
         }
         fun putUserId(value: Long) : Bundle {

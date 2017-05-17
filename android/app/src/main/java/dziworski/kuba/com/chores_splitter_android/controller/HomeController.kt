@@ -14,8 +14,10 @@ import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.support.RouterPagerAdapter
 import dziworski.kuba.com.chores_splitter_android.R
 import dziworski.kuba.com.chores_splitter_android.RxGateway
+import dziworski.kuba.com.chores_splitter_android.controller.chores.ChoresController
+import dziworski.kuba.com.chores_splitter_android.controller.tasks.TasksController
 
-class HomeController : Controller() {
+class HomeController :  Controller() {
 
     lateinit var viewPager:ViewPager
     lateinit var tabLayout:TabLayout

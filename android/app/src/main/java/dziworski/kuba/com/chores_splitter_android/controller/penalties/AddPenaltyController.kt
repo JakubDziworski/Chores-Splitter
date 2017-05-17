@@ -9,7 +9,7 @@ import butterknife.ButterKnife
 import com.bluelinelabs.conductor.Controller
 import dziworski.kuba.com.chores_splitter_android.R
 import dziworski.kuba.com.chores_splitter_android.RxGateway
-import dziworski.kuba.com.chores_splitter_android.controller.TasksListController
+import dziworski.kuba.com.chores_splitter_android.controller.common.TasksListController
 import dziworski.kuba.com.chores_splitter_android.http.AddPenaltyDto
 
 class AddPenaltyController : Controller {
