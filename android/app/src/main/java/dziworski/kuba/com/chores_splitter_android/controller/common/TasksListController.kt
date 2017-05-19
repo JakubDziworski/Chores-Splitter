@@ -1,7 +1,6 @@
 package dziworski.kuba.com.chores_splitter_android.controller.common
 
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +12,9 @@ import dziworski.kuba.com.chores_splitter_android.R
 import dziworski.kuba.com.chores_splitter_android.RxGateway
 import dziworski.kuba.com.chores_splitter_android.http.GetTaskDto
 import io.reactivex.rxkotlin.subscribeBy
+import org.joda.time.LocalDate
+import org.zakariya.stickyheaders.SectioningAdapter
+import org.zakariya.stickyheaders.StickyHeaderLayoutManager
 
 class TasksListController : Controller {
 
@@ -25,40 +27,75 @@ class TasksListController : Controller {
         val view = inflater.inflate(R.layout.controller_tasks_list, container, false)
         recyclerView = view.findViewById(R.id.tasks_list_recycler_view) as RecyclerView
         recyclerView.setHasFixedSize(true)
-        recyclerView.setLayoutManager(LinearLayoutManager(view.context))
+        recyclerView.setLayoutManager(StickyHeaderLayoutManager())
         recyclerView.adapter = TaskItemAdapter(getUserId(args), LayoutInflater.from(applicationContext))
         return view
     }
 
 
-    inner class TaskItemAdapter(val userId:Long,val inflater: LayoutInflater) : RecyclerView.Adapter<TaskItemAdapter.ViewHolder>() {
+    inner class TaskItemAdapter(val userId:Long,val inflater: LayoutInflater) : SectioningAdapter() {
 
         init {
             RxGateway.tasksFlowable
                     .map { it.tasks.filter { it.userId == userId } }
                     .subscribeBy (
                             onNext = {
-                                items = it
-                                notifyDataSetChanged()
+                                sections = it
+                                        .groupBy { LocalDate(it.assignedAt) }
+                                        .map { (date,tasks) ->
+                                            Section(date,tasks)
+                                        }
+                                notifyAllSectionsDataSetChanged()
                             }
                     )
         }
-        var items : List<GetTaskDto> = listOf()
+        var sections : List<Section> = listOf()
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+
+        override fun getNumberOfSections(): Int {
+            return sections.size
+        }
+
+        override fun getNumberOfItemsInSection(sectionIndex: Int): Int {
+            return sections[sectionIndex].tasks.count()
+        }
+
+        override fun doesSectionHaveFooter(sectionIndex: Int): Boolean {
+            return false
+        }
+
+        override fun doesSectionHaveHeader(sectionIndex: Int): Boolean {
+            return true
+        }
+
+        override fun onCreateItemViewHolder(parent: ViewGroup, itemUserType: Int): SectioningAdapter.ItemViewHolder {
             val row = inflater.inflate(R.layout.row_task,parent,false)
-            return ViewHolder(row)
+            return ItemViewHolder(row)
         }
 
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            holder.bind(items.get(position))
+        override fun onCreateHeaderViewHolder(parent: ViewGroup, headerUserType: Int): SectioningAdapter.HeaderViewHolder {
+            val row = inflater.inflate(R.layout.row_tasks_header_date,parent,false)
+            return HeaderViewHolder(row)
         }
 
-        override fun getItemCount(): Int {
-            return items.size
+        override fun onBindItemViewHolder(viewHolder: SectioningAdapter.ItemViewHolder, sectionIndex: Int, taskIndex: Int, itemUserType: Int) {
+            (viewHolder as ItemViewHolder).bind(sections[sectionIndex].tasks[taskIndex])
         }
 
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        override fun onBindHeaderViewHolder(viewHolder: SectioningAdapter.HeaderViewHolder, sectionIndex: Int, headerUserType: Int) {
+            (viewHolder as HeaderViewHolder).bind(sections[sectionIndex])
+        }
+
+
+        inner class HeaderViewHolder(view: View) : SectioningAdapter.HeaderViewHolder(view) {
+            val titleTextView = view.findViewById(R.id.row_tasks_header_date_txt) as TextView
+
+            fun bind(section:Section) {
+                titleTextView.text = section.date.toString()
+            }
+        }
+
+        inner class ItemViewHolder(view: View) : SectioningAdapter.ItemViewHolder(view) {
 
             val nameText = view.findViewById(R.id.row_task_name_txt) as TextView
             val pointsText = view.findViewById(R.id.row_task_points_text) as TextView
@@ -73,6 +110,8 @@ class TasksListController : Controller {
                 }
             }
         }
+
+        inner class Section(val date:LocalDate,val tasks:List<GetTaskDto>)
     }
 
     companion object Boundles {
