@@ -1,0 +1,36 @@
+{
+  "name": "chores-splitter-web-client",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@types/jest": "^19.2.3",
+    "@types/node": "^7.0.21",
+    "@types/react": "^15.0.24",
+    "@types/react-dom": "^15.5.0",
+    "@types/react-redux": "^4.4.40",
+    "@types/redux": "^3.6.0",
+    "@types/redux-thunk": "^2.1.0",
+    "@types/ramda": "^0.0.9",
+    "@types/lodash": "^4.14.64",
+    "lodash": "^4.17.4",
+    "react": "^15.5.4",
+    "ramda": "^0.23.0",
+    "react-dom": "^15.5.4",
+    "chart.js": "^2.5.0",
+    "redux": "^3.6.0",
+    "react-redux": "^5.0.5",
+    "whatwg-fetch": "^2.0.3",
+    "redux-thunk": "^2.2.0",
+    "react-chartjs2": "^1.1.2"
+  },
+  "devDependencies": {
+    "react-scripts-ts": "1.4.0"
+  },
+  "scripts": {
+    "start": "react-scripts-ts start",
+    "build": "react-scripts-ts build",
+    "test": "react-scripts-ts test --env=jsdom",
+    "eject": "react-scripts-ts eject"
+  },
+  "proxy": "http://localhost:8090/"
+}
