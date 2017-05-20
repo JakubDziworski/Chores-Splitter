@@ -6,8 +6,9 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.ExceptionHandler
 import com.kuba.dziworski.chores.splitter.service.Failures.TimeForTaskAlreadyEndedException
 
-trait Routes extends ChoresRoutes with TaskRoutes with UsersRoutes with PenaltiesRoutes with AppConfig {
+trait Routes extends ChoresRoutes with TaskRoutes with UsersRoutes with PenaltiesRoutes with StaticRoutes with AppConfig {
   private val apiWrapper = pathPrefix("api" / apiVersion)
+  private val StaticContentDir = "../web-client/build/"
 
   val exceptionHandler = ExceptionHandler {
     case e@TimeForTaskAlreadyEndedException =>
@@ -17,6 +18,6 @@ trait Routes extends ChoresRoutes with TaskRoutes with UsersRoutes with Penaltie
   val routes = handleExceptions(exceptionHandler) {
     apiWrapper {
         choresRoutes ~ usersRoutes ~ tasksRoutes ~ penaltiesRoutes
-    }
+    } ~ staticRoutes
   }
 }
