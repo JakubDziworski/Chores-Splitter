@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/header_height"
+    android:layout_marginBottom="@dimen/row_spacing"
+    android:gravity="center"
+    android:background="#327174"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/row_tasks_header_date_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="25.05.2017" />
+</LinearLayout>

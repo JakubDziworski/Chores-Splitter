@@ -11,6 +11,7 @@ import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import dziworski.kuba.com.chores_splitter_android.R
 import dziworski.kuba.com.chores_splitter_android.RxGateway
+import dziworski.kuba.com.chores_splitter_android.controller.common.UsersController
 import dziworski.kuba.com.chores_splitter_android.http.GetPenaltyDto
 import dziworski.kuba.com.chores_splitter_android.http.GetUserDto
 import dziworski.kuba.com.penaltys_splitter_android.controller.AddPenaltyController

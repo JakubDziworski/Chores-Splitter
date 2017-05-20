@@ -1,4 +1,4 @@
-package dziworski.kuba.com.chores_splitter_android.controller
+package dziworski.kuba.com.chores_splitter_android.controller.common
 
 import android.os.Bundle
 import android.view.LayoutInflater

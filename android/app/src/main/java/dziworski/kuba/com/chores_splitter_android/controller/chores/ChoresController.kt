@@ -1,4 +1,4 @@
-package dziworski.kuba.com.chores_splitter_android.controller
+package dziworski.kuba.com.chores_splitter_android.controller.chores
 
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -29,7 +29,7 @@ class ChoresController : Controller() {
         return root
     }
 
-    fun setupAddChoreBtn(root:ViewGroup) {
+    fun setupAddChoreBtn(root: ViewGroup) {
         val addChoreBtn = root.findViewById(R.id.add_chore_btn) as ImageButton
         addChoreBtn.setOnClickListener {
             router.pushController(RouterTransaction.with(AddChoreController()))
@@ -39,8 +39,7 @@ class ChoresController : Controller() {
     inner class ChoreItemAdapter(val inflater: LayoutInflater) : RecyclerView.Adapter<ChoreItemAdapter.ViewHolder>() {
 
         init {
-            RxGateway
-                    .choresFlowable
+            RxGateway.choresFlowable
                     .subscribeBy (
                             onNext = {
                                 items = it.chores

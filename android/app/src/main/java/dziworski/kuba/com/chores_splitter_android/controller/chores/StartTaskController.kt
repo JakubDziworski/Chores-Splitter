@@ -1,4 +1,4 @@
-package dziworski.kuba.com.chores_splitter_android.controller
+package dziworski.kuba.com.chores_splitter_android.controller.chores
 
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -6,17 +6,15 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.TextView
 import com.bluelinelabs.conductor.Controller
-import com.bluelinelabs.conductor.RouterTransaction
 import dziworski.kuba.com.chores_splitter_android.R
 import dziworski.kuba.com.chores_splitter_android.RxGateway
+import dziworski.kuba.com.chores_splitter_android.controller.common.TasksListController
 import dziworski.kuba.com.chores_splitter_android.http.AddTaskDto
 import dziworski.kuba.com.chores_splitter_android.http.ChoreId
 import dziworski.kuba.com.chores_splitter_android.http.GetChoreDto
 import dziworski.kuba.com.chores_splitter_android.http.UserId
-import io.reactivex.rxkotlin.subscribeBy
 
 class StartTaskController : Controller {
     private lateinit var recyclerView : RecyclerView
@@ -41,14 +39,11 @@ class StartTaskController : Controller {
     inner class ChoreItemAdapter(val inflater: LayoutInflater) : RecyclerView.Adapter<ChoreItemAdapter.ViewHolder>() {
 
         init {
-            RxGateway
-                    .choresFlowable
-                    .subscribeBy (
-                            onNext = {
-                                items = it.chores
-                                notifyDataSetChanged()
-                            }
-                    )
+            RxGateway.choresFlowable
+                    .subscribe {
+                        items = it.chores
+                        notifyDataSetChanged()
+                    }
         }
         var items : List<GetChoreDto> = listOf()
 

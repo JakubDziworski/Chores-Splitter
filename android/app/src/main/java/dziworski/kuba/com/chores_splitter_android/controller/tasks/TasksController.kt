@@ -1,4 +1,4 @@
-package dziworski.kuba.com.chores_splitter_android.controller
+package dziworski.kuba.com.chores_splitter_android.controller.tasks
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,9 +7,10 @@ import android.widget.*
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import dziworski.kuba.com.chores_splitter_android.R
-import dziworski.kuba.com.chores_splitter_android.RxGateway
+import dziworski.kuba.com.chores_splitter_android.controller.common.UsersController
+import dziworski.kuba.com.chores_splitter_android.controller.chores.StartTaskController
+import dziworski.kuba.com.chores_splitter_android.controller.common.TasksListController
 import dziworski.kuba.com.chores_splitter_android.http.GetUserDto
-import io.reactivex.rxkotlin.subscribeBy
 
 class TasksController : Controller() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
