@@ -65,15 +65,7 @@ class ChoresService(db: Database)(implicit clock: Clock) {
 
   def getChoresAfterInterval(): Future[GetChoresDto] = {
 
-    val newestChoresIds = chores
-      .filter(_.interval.isDefined)
-      .groupBy(_.srcChoreId).map { case (srcId, chrs) =>
-      chrs.map(_.choreId).max.getOrElse(0L)
-    }
-
-    val q = chores.join(newestChoresIds).on(_.choreId === _).map(_._1)
-      .joinLeft(tasks).on((chore,t) => t.choreId === chore.choreId)
-      .map{case (chore,task) => (chore,task)}
+    val q = chores.filter(_.interval.isDefined).joinLeft(tasks).on((chore,t) => t.choreId === chore.choreId)
 
     def allTasksAreAfterInterval(interval:Int, tasksRows: Seq[TasksRow]) = {
       tasksRows.forall(_.completedAt.forall(daysSince(_) >= interval))
@@ -81,11 +73,16 @@ class ChoresService(db: Database)(implicit clock: Clock) {
 
     db.run(q.result)
       .map(rows =>
-        rows.groupBy(_._1)
-          .filter { case (chore, tasksForChore) =>
+        rows.groupBy(_._1.srcChoreId)
+          .values
+          .filter { tasksForChore =>
             val tasks = tasksForChore.flatMap(_._2)
-            allTasksAreAfterInterval(chore.interval.get, tasks)
-          }.keys.toList.sortBy(_.choreId))
+            val chore = tasksForChore.map(_._1)
+            val newestChore = chore.maxBy(_.choreId)
+            allTasksAreAfterInterval(newestChore.interval.get, tasks)
+          }
+          .map(_.map(_._1).maxBy(_.choreId))
+          .toList.sortBy(_.choreId))
       .map(_.toDto)
   }
 
