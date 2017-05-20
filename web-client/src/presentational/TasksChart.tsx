@@ -1,7 +1,6 @@
 import * as React from 'react'
 import {Task, Tasks, User, Users} from "../Model";
 import RC2 from 'react-chartjs2';
-import R = require("ramda");
 import L = require("lodash");
 import {isUndefined} from "util";
 
