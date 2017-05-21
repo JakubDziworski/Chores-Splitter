@@ -6,6 +6,7 @@ import {connect, Dispatch} from "react-redux";
 const logo = require('./logo.svg');
 import {TaskChart} from "./presentational/TasksChart"
 import {isUndefined} from "util";
+import {ChoresPopularity} from "./presentational/ChoresPopularity";
 
 
 class App extends React.Component <AppProps, {}> {
@@ -20,13 +21,10 @@ class App extends React.Component <AppProps, {}> {
             <div className="App">
                 <div className="App-header">
                     <img src={logo} className="App-logo" alt="logo"/>
-                    <h2>Welcome to React</h2>
+                    <h2>Chores Splitter Stats</h2>
                 </div>
-                <TaskChart tasks={this.props.tasks} users={this.props.users}/>
-
-                <p className="App-intro">
-                    To get started, edit <code>src/App.tsx</code> and save to reload.
-                </p>
+                    <TaskChart tasks={this.props.tasks} users={this.props.users}/>
+                    <ChoresPopularity tasks={this.props.tasks}/>
             </div>
         );
     }
