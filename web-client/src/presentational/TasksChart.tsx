@@ -3,6 +3,7 @@ import {Task, Tasks, Users} from '../Model';
 import RC2 from 'react-chartjs2';
 import {isUndefined} from 'util';
 import L = require('lodash');
+import {randomColor} from "./Common";
 
 export interface TasksChartProps {
     tasks: Tasks;
@@ -10,15 +11,6 @@ export interface TasksChartProps {
 }
 
 export const TaskChart: React.StatelessComponent<TasksChartProps> = ({tasks, users}) => {
-        const randomColor = () => {
-            const letters = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
-        };
-
         if (isUndefined(users.users) || isUndefined((tasks.tasks))) {
             return (<div>Loading...</div>);
         }
