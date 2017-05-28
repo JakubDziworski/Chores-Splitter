@@ -27,16 +27,16 @@ export const TaskChart: React.StatelessComponent<TasksChartProps> = ({tasks, use
         if (isUndefined(users.users) || isUndefined((tasks.tasks))) {
             return (<div>Loading...</div>);
         }
-        const completedTasks: Task[] = L.sortBy(tasks.tasks.filter(it => it.completedAt),t => t.completedAt);
-        const usersTasks = function (userId: number) : Task[] {
+        const completedTasks: Task[] = L.sortBy(tasks.tasks.filter(it => it.completedAt), t => t.completedAt);
+        const usersTasks = function (userId: number): Task[] {
             return completedTasks.filter(it => it.userId == userId);
         };
-        const pointsUntilTask = function (task: Task) : number {
+        const pointsUntilTask = function (task: Task): number {
             const allTasksForUser = usersTasks(task.userId);
             const olderThan = L.filter(allTasksForUser, it => it.completedAt < task.completedAt);
             return task.chore.points + L.sumBy(olderThan, it => it.chore.points)
         };
-        const chartModel : UserModel[] = users.users.map(user => ({
+        const chartModel: UserModel[] = users.users.map(user => ({
                 user: user,
                 taskPoints: usersTasks(user.id).map(task => ({
                     task: task,
@@ -75,32 +75,46 @@ export const TaskChart: React.StatelessComponent<TasksChartProps> = ({tasks, use
                     hoverRadius: 7,
                 }
             },
+            hover: {
+                mode: 'x',
+                intersect: false
+            },
             tooltips: {
+                mode: 'x',
+                intersect: false,
                 title: {
                     show: false
                 },
                 callbacks: {
                     title: function (items) {
-                        const item = items[0];
-                        const taskPoint = chartModel[item.datasetIndex].taskPoints[item.index];
-                        const totalPoints = taskPoint.point.y;
-                        const userName = chartModel[item.datasetIndex].user.name;
-                        const time = new Date(taskPoint.task.completedAt).toLocaleString('pl-PL');
-                        return userName + '(' + totalPoints + ' points) - ' + time;
+                        const usersModels: UserModel[] = items.map(it => chartModel[it.datasetIndex]);
+                        const tasksModels: TaskModel[] = items.map(it => chartModel[it.datasetIndex].taskPoints[it.index]);
+                        const uniqueUsers: UserModel[] = L.uniq(usersModels);
+                        const date = new Date(tasksModels[0].task.completedAt);
+                        const time = date.toLocaleString('pl-PL');
+                        return [time].concat(uniqueUsers.map(userModel => {
+                                const userTasks = userModel.taskPoints.filter(it => L.includes(tasksModels, it));
+                                const newestTask: TaskModel = L.maxBy(userTasks, t => t.point.y);
+                                const totalPoints = newestTask.point.y;
+                                const userName = userModel.user.name;
+                                return userName + ' (' + totalPoints + ' points)';
+                            }
+                        ));
                     },
                     label: function (item) {
                         const taskPoint = chartModel[item.datasetIndex].taskPoints[item.index];
                         const taskName = taskPoint.task.chore.name;
                         const taskPoints = taskPoint.task.chore.points;
-                        return taskName + '(+' + taskPoints + ' points)';
+                        const totalPoints = taskPoint.point.y;
+                        return taskName + ' +' + taskPoints + ' points';
                     }
                 }
             },
             scales: {
                 xAxes: [{
                     display: true,
-                    ticks : {
-                        callback : (value) => {
+                    ticks: {
+                        callback: (value) => {
                             return new Date(value).toLocaleDateString('pl-PL');
                         }
                     }
