@@ -144,7 +144,7 @@ class TasksDispatcherServiceTest extends FunSuite with Matchers with DbSetUp wit
   case class AssertedTask(chore: GetChoreDto, userId: Long, assignedAt: Long, completed: Boolean)
 
   def getTasks: List[(GetChoreDto, Long, Long, Boolean)] = {
-    await(tService.getTasks()).tasks.map(t => (t.chore, t.userId, t.assignedAt, t.completed))
+    await(tService.getTasks()).tasks.map(t => (t.chore, t.userId, t.assignedAt, t.completedAt.isDefined))
   }
 
   def addUser(name: String): UserId = {

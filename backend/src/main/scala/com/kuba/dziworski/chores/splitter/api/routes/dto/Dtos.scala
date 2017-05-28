@@ -47,7 +47,7 @@ object UserDtos {
 object TaskDtos {
   case class TaskId(taskId:Long)
   case class AddTaskDto(choreId: ChoreId, userId: UserId)
-  case class GetTaskDto(id: Long, chore:GetChoreDto, userId:Long, assignedAt: Long, completed: Boolean)
+  case class GetTaskDto(id: Long, chore:GetChoreDto, userId:Long, assignedAt: Long,completedAt:Option[Long])
   case class GetTasksDto(tasks:List[GetTaskDto])
 
   trait TaskFormat extends SprayJsonSupport with DefaultJsonProtocol with ChoreFormat with UserFormat {
@@ -96,7 +96,7 @@ object RowConversions {
         choreRow.toDto,
         taskRow.userId,
         taskRow.assignedAt,
-        taskRow.completedAt.isDefined
+        taskRow.completedAt
       )
     }
   }
