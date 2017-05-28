@@ -19,8 +19,8 @@ export const ChoresPopularity: React.StatelessComponent<ChoresPopularityProps> =
         if (isUndefined((tasks.tasks))) {
             return (<div>Loading...</div>);
         }
-        const tasksList = tasks.tasks.filter(it => it.completed);
-        const choresAmounts: ChoreAmount[] = L.toArray(L.groupBy(tasksList.map(it => it.chore.name), it => it))
+        const completedTasks = tasks.tasks.filter(it => it.completedAt);
+        const choresAmounts: ChoreAmount[] = L.toArray(L.groupBy(completedTasks.map(it => it.chore.name), it => it))
             .map(it => {
                 return {
                     choreName: it[0],
