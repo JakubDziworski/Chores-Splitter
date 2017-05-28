@@ -101,13 +101,13 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
             GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
             mark.userId,
             100,
-            completed = false),
+            completedAt = None),
           GetTaskDto(
             1,
             GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
             andrew.userId,
             100,
-            completed = false)
+            completedAt = None)
         ))
       }
     }
@@ -119,6 +119,7 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
       val andrew = addUser("andrew", "andrew@gmail.com")
       val sweep = addChore("sweep", 5, Some(3))
       val andrewSweepTask = addTask(andrew, sweep)
+      setTime(500)
       Put(s"$ApiPrefix/tasks/1/set-completed") ~> routes ~> check {
         status shouldBe StatusCodes.OK
       }
@@ -127,8 +128,8 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
           1,
           GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
           1,
-          200,
-          completed = true)
+          assignedAt = 200,
+          completedAt = Some(500))
       ))
     }
   }
@@ -139,6 +140,7 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
       val andrew = addUser("andrew", "andrew@gmail.com")
       val sweep = addChore("sweep", 5, Some(3))
       val andrewSweepTask = addTask(andrew, sweep)
+      setTime(500)
       Put(s"$ApiPrefix/tasks/1/set-completed") ~> routes ~> check {
         status shouldBe StatusCodes.OK
       }
@@ -147,8 +149,8 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
           1,
           GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
           1,
-          200,
-          completed = true)
+          assignedAt = 200,
+          completedAt = Some(500))
       ))
       Put(s"$ApiPrefix/tasks/1/set-uncompleted") ~> routes ~> check {
         status shouldBe StatusCodes.OK
@@ -159,7 +161,7 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
           GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
           1,
           200,
-          completed = false)
+          completedAt = None)
       ))
     }
     "return BadRequest if day when task was submitted ended" in {
@@ -189,7 +191,7 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
             GetChoreDto(sweep.choreId, "sweep", 5, Some(3)),
             andrew.userId,
             100,
-            completed = false))
+            completedAt = None))
         )
       }
     }
