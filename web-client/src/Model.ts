@@ -17,7 +17,7 @@ export interface Task {
     chore:Chore;
     userId:number;
     assignedAt:number;
-    completed:boolean;
+    completedAt:number;
 }
 
 export interface Chore {
