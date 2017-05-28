@@ -104,7 +104,7 @@ class TasksListController : Controller {
             fun bind(item: GetTaskDto) {
                 nameText.text = item.chore.name
                 pointsText.text = item.chore.points.toString() + " points"
-                completedCheckBox.isChecked = item.completed
+                completedCheckBox.isChecked = item.completedAt != null
                 completedCheckBox.setOnClickListener {
                     RxGateway.setTaskCompleted(completedCheckBox.isChecked, item.id)
                 }
