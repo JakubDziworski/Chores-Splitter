@@ -33,7 +33,7 @@ class TasksDispatcherService(db: Database,
     getLastTaskDispatch.flatMap { lastDispatch =>
       if(isBeforeToday(lastDispatch)) {
         for {
-          _ <- addPenaltyForUncompletedTasks()
+          _ <- removeUncompleted()
           choresForToday <- choresService.getChoresAfterInterval()
           points <- usersService.getUsers.map(_.users.map(u => UserPoint(UserId(u.id),u.points)))
           newTasks <- tasksService.addTasks(TasksDispatcherService.assignTasksForToday(points, choresForToday.chores))
@@ -53,6 +53,10 @@ class TasksDispatcherService(db: Database,
   def updateLastTaskDispatch(): Future[Done] = {
     val q = tasksDispatches.map(_.dispatchedAt) += now
     db.run(q).map(_ => Done)
+  }
+
+  def removeUncompleted() : Future[Done] = {
+    db.run(tasks.filter(_.completedAt.isEmpty).delete).map(_ => Done)
   }
 
   def addPenaltyForUncompletedTasks() : Future[Done] = {
