@@ -97,7 +97,41 @@ class TasksDispatcherServiceTest extends FunSuite with Matchers with DbSetUp wit
     )
   }
 
-  test("task dispatcher should add penalty when task not completed") {
+  test("Should remove uncompleted task before new dispatch without adding penalty") {
+    val john = addUser("john")
+    val dishes = addChore("dishes", 10, Some(1))
+    val sweep = addChore("sweep", 5, Some(1))
+
+    val firstDispatchTime = new DateTime(2017, 10, 25, 10, 30, 0).getMillis
+    setTime(firstDispatchTime)
+    val uncompletedTask = addTask(ChoreId(dishes.id), john)
+    val completedTask = addTask(ChoreId(sweep.id), john)
+    setCompleted(TaskId(completedTask.taskId))
+    await(taskDispatcher.dispatch()) shouldBe Dispatched
+
+    getUsersPoints shouldBe List(
+      (john.userId, 5)
+    )
+    getTasks shouldBe List(
+      (dishes, john.userId, firstDispatchTime, false),
+      (sweep,  john.userId, firstDispatchTime, true)
+    )
+
+    val secondDispatchTime = new DateTime(firstDispatchTime).plusDays(1).getMillis
+    setTime(secondDispatchTime)
+    await(taskDispatcher.dispatch()) shouldBe Dispatched
+
+    getUsersPoints shouldBe List(
+      (john.userId, 5)
+    )
+    getTasks shouldBe List(
+      (dishes, john.userId, secondDispatchTime, false),
+      (sweep,  john.userId, secondDispatchTime, false),
+      (sweep,  john.userId, firstDispatchTime, true)
+    )
+  }
+
+  ignore("Penalties disabled! task dispatcher should add penalty when task not completed") {
     val john = addUser("john")
     val dishes = addChore("dishes", 10, Some(2))
     val uncompletedTask = addTask(ChoreId(dishes.id), john)
