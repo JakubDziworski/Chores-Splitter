@@ -15,7 +15,17 @@ trait Routes extends ChoresRoutes with TaskRoutes with UsersRoutes with Penaltie
       complete(StatusCodes.BadRequest, e.getMessage)
   }
 
-  val routes = handleExceptions(exceptionHandler) {
+  val logDuration = extractRequestContext.flatMap { ctx =>
+    val start = System.currentTimeMillis()
+    // handling rejections here so that we get proper status codes
+    mapResponse { resp =>
+      val d = System.currentTimeMillis() - start
+      println(s"[${resp.status.intValue()}] ${ctx.request.method.name} ${ctx.request.uri} took: ${d}ms")
+      resp
+    }
+  }
+
+  val routes = (logDuration & handleExceptions(exceptionHandler)) {
     apiWrapper {
         choresRoutes ~ usersRoutes ~ tasksRoutes ~ penaltiesRoutes
     } ~ staticRoutes
