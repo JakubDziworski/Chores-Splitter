@@ -58,3 +58,15 @@ lazy val slickCodeGenTask = (sourceManaged, dependencyClasspath in Compile, runn
   Seq(file(fname))
 }
 parallelExecution in Test := false
+
+mainClass in assembly := Some("com.kuba.dziworski.chores.splitter.Main")
+test in assembly := false
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case "reference.conf" => MergeStrategy.concat
+  case "akka.conf" => MergeStrategy.concat
+  case "application.conf" => MergeStrategy.concat
+  case x => MergeStrategy.first
+}
+
+assemblyOutputPath in assembly := file("bin/chores-splitter.jar")
