@@ -8,11 +8,19 @@ import com.bluelinelabs.conductor.Controller
 import dziworski.kuba.com.chores_splitter_android.R
 import dziworski.kuba.com.chores_splitter_android.RxGateway
 import dziworski.kuba.com.chores_splitter_android.http.GetUserDto
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 
 class UsersController : Controller() {
     private lateinit var usersSpinner : Spinner
+    private val disposable = CompositeDisposable()
+
     lateinit var userChangeListener: (GetUserDto) -> Unit
+
+
+    override fun onDestroyView(view: View) {
+        disposable.clear()
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
         val view = inflater.inflate(R.layout.controller_users, container, false)
@@ -27,16 +35,13 @@ class UsersController : Controller() {
                 userChangeListener(user)
             }
         }
-        RxGateway.usersFlowable
-            .subscribeBy (
-                    onNext = {
-                        spinnerAdapter.clear()
-                        spinnerAdapter.addAll(it.users)
-                    }
-            )
+        disposable.add(RxGateway.usersFlowable
+                .subscribeBy (
+                        onNext = {
+                            spinnerAdapter.clear()
+                            spinnerAdapter.addAll(it.users)
+                        }
+                ))
         return view
     }
-
-
-
 }

@@ -11,6 +11,7 @@ import com.bluelinelabs.conductor.Controller
 import dziworski.kuba.com.chores_splitter_android.R
 import dziworski.kuba.com.chores_splitter_android.RxGateway
 import dziworski.kuba.com.chores_splitter_android.http.GetTaskDto
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 import org.joda.time.LocalDate
 import org.zakariya.stickyheaders.SectioningAdapter
@@ -22,6 +23,7 @@ class TasksListController : Controller {
     constructor(bundle: Bundle) : super(bundle)
 
     private lateinit var recyclerView: RecyclerView
+    private val disposable = CompositeDisposable()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
         val view = inflater.inflate(R.layout.controller_tasks_list, container, false)
@@ -32,11 +34,14 @@ class TasksListController : Controller {
         return view
     }
 
+    override fun onDestroyView(view: View) {
+        disposable.clear()
+    }
 
-    inner class TaskItemAdapter(val userId:Long,val inflater: LayoutInflater) : SectioningAdapter() {
+    inner class TaskItemAdapter(val userId:Long, val inflater: LayoutInflater) : SectioningAdapter() {
 
         init {
-            RxGateway.tasksFlowable
+            disposable.add(RxGateway.tasksFlowable
                     .map { it.tasks.filter { it.userId == userId } }
                     .subscribeBy (
                             onNext = {
@@ -47,7 +52,7 @@ class TasksListController : Controller {
                                         }
                                 notifyAllSectionsDataSetChanged()
                             }
-                    )
+                    ))
         }
         var sections : List<Section> = listOf()
 

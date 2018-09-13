@@ -13,10 +13,14 @@ import dziworski.kuba.com.chores_splitter_android.R
 import dziworski.kuba.com.chores_splitter_android.RxGateway
 import dziworski.kuba.com.chores_splitter_android.http.GetChoreDto
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.disposables.CompositeDisposable
+
+
 
 class ChoresController : Controller() {
 
     private lateinit var recyclerView : RecyclerView
+    private val compositeDisposable = CompositeDisposable()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
         retainViewMode = RetainViewMode.RETAIN_DETACH
@@ -29,6 +33,10 @@ class ChoresController : Controller() {
         return root
     }
 
+    override fun onDestroyView(view: View) {
+        compositeDisposable.clear()
+    }
+
     fun setupAddChoreBtn(root: ViewGroup) {
         val addChoreBtn = root.findViewById(R.id.add_chore_btn) as ImageButton
         addChoreBtn.setOnClickListener {
@@ -39,13 +47,13 @@ class ChoresController : Controller() {
     inner class ChoreItemAdapter(val inflater: LayoutInflater) : RecyclerView.Adapter<ChoreItemAdapter.ViewHolder>() {
 
         init {
-            RxGateway.choresFlowable
+            compositeDisposable.add(RxGateway.choresFlowable
                     .subscribeBy (
                             onNext = {
                                 items = it.chores
                                 notifyDataSetChanged()
                             }
-                    )
+                    ))
         }
         var items : List<GetChoreDto> = listOf()
 

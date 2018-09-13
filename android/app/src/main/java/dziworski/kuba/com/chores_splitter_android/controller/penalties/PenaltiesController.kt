@@ -15,11 +15,13 @@ import dziworski.kuba.com.chores_splitter_android.controller.common.UsersControl
 import dziworski.kuba.com.chores_splitter_android.http.GetPenaltyDto
 import dziworski.kuba.com.chores_splitter_android.http.GetUserDto
 import dziworski.kuba.com.penaltys_splitter_android.controller.AddPenaltyController
+import io.reactivex.disposables.CompositeDisposable
 
 class PenaltiesController : Controller() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var addPenaltyBtn : ImageButton
+    private val disposable = CompositeDisposable()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
         retainViewMode = RetainViewMode.RETAIN_DETACH
@@ -47,6 +49,10 @@ class PenaltiesController : Controller() {
         return view
     }
 
+    override fun onDestroyView(view: View) {
+        disposable.clear()
+    }
+
     inner class PenaltiesItemAdapter(val inflater: LayoutInflater) : RecyclerView.Adapter<PenaltiesItemAdapter.ViewHolder>() {
 
         var userId: Long? = null
@@ -64,13 +70,13 @@ class PenaltiesController : Controller() {
         var items: List<GetPenaltyDto> = listOf()
 
         init {
-            RxGateway
+            disposable.add(RxGateway
                     .penaltiesFlowable
                     .map { it.penalties }
                     .subscribe {
                         items = it
                         notifyDataSetChanged()
-                    }
+                    })
         }
 
 

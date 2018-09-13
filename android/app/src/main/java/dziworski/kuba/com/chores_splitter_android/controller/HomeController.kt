@@ -16,11 +16,13 @@ import dziworski.kuba.com.chores_splitter_android.R
 import dziworski.kuba.com.chores_splitter_android.RxGateway
 import dziworski.kuba.com.chores_splitter_android.controller.chores.ChoresController
 import dziworski.kuba.com.chores_splitter_android.controller.tasks.TasksController
+import io.reactivex.disposables.CompositeDisposable
 
 class HomeController :  Controller() {
 
     lateinit var viewPager:ViewPager
     lateinit var tabLayout:TabLayout
+    private val disposable = CompositeDisposable()
 
     val pagerAdapter : PagerAdapter = object: RouterPagerAdapter(this) {
         val tabs = listOf("tasks" to TasksController(),"chores" to ChoresController(),"penalties" to PenaltiesController())
@@ -49,15 +51,19 @@ class HomeController :  Controller() {
         return view
     }
 
+    override fun onDestroyView(view: View) {
+        disposable.clear()
+    }
+
     private fun setupErrorHandling() {
-        RxGateway.errorsFlowable.subscribe { throwable ->
+        disposable.add(RxGateway.errorsFlowable.subscribe { throwable ->
             Log.e(RxGateway::class.toString(), throwable.stackTrace.joinToString("\n"))
             Toast.makeText(
                     applicationContext,
                     "NETWORK ERROR $throwable",
                     Toast.LENGTH_SHORT)
                     .show()
-        }
+        })
     }
 
     override fun onDetach(view: View) {

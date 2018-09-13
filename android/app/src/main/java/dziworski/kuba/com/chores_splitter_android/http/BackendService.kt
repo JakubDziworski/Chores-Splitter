@@ -52,10 +52,10 @@ object Backend {
     val instance : BackendService by lazy {
         Log.i(Tag,"Creating backend service")
         val httpClient = OkHttpClient.Builder()
-                .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
                 .build()
         Retrofit.Builder()
-                .baseUrl("http://10.7.69.193:8090/api/v1/")
+                .baseUrl("http://192.168.2.5:8090/api/v1/")
 //                .baseUrl("http://10.0.2.2:8090/api/v1/")
                 .client(httpClient)
                 .addConverterFactory(GsonConverterFactory.create())

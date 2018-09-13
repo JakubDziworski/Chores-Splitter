@@ -15,9 +15,11 @@ import dziworski.kuba.com.chores_splitter_android.http.AddTaskDto
 import dziworski.kuba.com.chores_splitter_android.http.ChoreId
 import dziworski.kuba.com.chores_splitter_android.http.GetChoreDto
 import dziworski.kuba.com.chores_splitter_android.http.UserId
+import io.reactivex.disposables.CompositeDisposable
 
 class StartTaskController : Controller {
     private lateinit var recyclerView : RecyclerView
+    private val disposable = CompositeDisposable()
 
     constructor() : super()
     constructor(userId:Long) : this(TasksListController.putUserId(userId))
@@ -32,6 +34,10 @@ class StartTaskController : Controller {
         return root
     }
 
+    override fun onDestroyView(view: View) {
+        disposable.clear()
+    }
+
     override fun handleBack(): Boolean {
         return router.popCurrentController()
     }
@@ -39,11 +45,11 @@ class StartTaskController : Controller {
     inner class ChoreItemAdapter(val inflater: LayoutInflater) : RecyclerView.Adapter<ChoreItemAdapter.ViewHolder>() {
 
         init {
-            RxGateway.choresFlowable
+            disposable.add(RxGateway.choresFlowable
                     .subscribe {
                         items = it.chores
                         notifyDataSetChanged()
-                    }
+                    })
         }
         var items : List<GetChoreDto> = listOf()
 
