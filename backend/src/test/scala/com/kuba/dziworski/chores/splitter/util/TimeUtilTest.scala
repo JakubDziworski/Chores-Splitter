@@ -39,4 +39,12 @@ class TimeUtilTest extends FunSuite with TestHelpers with Matchers {
     TimeUtil.daysSince(now.minusDays(2).getMillis) shouldBe 2
     TimeUtil.daysSince(now.minusDays(3).getMillis) shouldBe 3
   }
+
+  test("hour of day") {
+    val time = new DateTime(2017,12,25,5,30,0)
+    setTime(time.getMillis)
+    TimeUtil.getHourOfDay shouldBe 5
+    setTime(time.plusMinutes(30).getMillis)
+    TimeUtil.getHourOfDay shouldBe 6
+  }
 }

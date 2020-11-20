@@ -18,8 +18,8 @@ class TasksDispatcherServiceTest extends FunSuite with Matchers with DbSetUp wit
   val pService = new PenaltyService(db)
   val taskDispatcher = new TasksDispatcherService(db, uService, chService, pService, tService)
 
-  test("task dispatcher should dispatch only if it has not dispatched in current day") {
-    val dateTimeNow = new DateTime(2017, 12, 30, 10, 30, 0)
+  test("task dispatcher should dispatch only if it has not dispatched in current day after 4") {
+    val dateTimeNow = new DateTime(2017, 12, 30, 4, 30, 0)
     val now = dateTimeNow.getMillis
     val tommorow = dateTimeNow.plusDays(1).getMillis
     val oneHourLater = dateTimeNow.plusHours(1).getMillis

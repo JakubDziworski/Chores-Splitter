@@ -31,7 +31,7 @@ class TasksDispatcherService(db: Database,
   def dispatch(): Future[DispatchResult] = {
     //TODO transactionally!
     getLastTaskDispatch.flatMap { lastDispatch =>
-      if(isBeforeToday(lastDispatch)) {
+      if(isBeforeToday(lastDispatch) && getHourOfDay >= 4) {
         for {
           _ <- removeUncompleted()
           choresForToday <- choresService.getChoresAfterInterval()

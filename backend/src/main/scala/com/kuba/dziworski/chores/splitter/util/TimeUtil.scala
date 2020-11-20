@@ -14,9 +14,13 @@ object TimeUtil {
     daysSince(milis) > 0
   }
 
-  def daysSince(milis:Long)(implicit clock:Clock): Long = {
+  def daysSince(millis:Long)(implicit clock:Clock): Long = {
     val today = LocalDate.now(clock)
-    val day = Instant.ofEpochMilli(milis).atZone(clock.getZone).toLocalDate
+    val day = Instant.ofEpochMilli(millis).atZone(clock.getZone).toLocalDate
     DAYS.between(day,today)
+  }
+
+  def getHourOfDay(implicit clock: Clock) : Int = {
+    Instant.now(clock).atZone(clock.getZone).getHour
   }
 }
