@@ -63,7 +63,7 @@ class TasksDispatcherServiceTest extends FunSuite with Matchers with DbSetUp wit
       (markId, 15)
     )
 
-    val secondDispatchTime = new DateTime(firstDispatchTime).plusDays(1).getMillis
+    val secondDispatchTime = new DateTime(firstDispatchTime).plusHours(25).getMillis
     setTime(secondDispatchTime)
     await(taskDispatcher.dispatch()) shouldBe Dispatched
     getTasks shouldBe List(
@@ -78,7 +78,7 @@ class TasksDispatcherServiceTest extends FunSuite with Matchers with DbSetUp wit
       (markId, 15)
     )
 
-    val thirdDispatchTime = new DateTime(secondDispatchTime).plusDays(1).getMillis
+    val thirdDispatchTime = new DateTime(secondDispatchTime).plusHours(25).getMillis
     setTime(thirdDispatchTime)
     await(taskDispatcher.dispatch()) shouldBe Dispatched
     getTasks shouldBe List(

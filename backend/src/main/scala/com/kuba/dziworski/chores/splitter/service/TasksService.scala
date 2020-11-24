@@ -70,7 +70,7 @@ class TasksService(db: Database)(implicit clock: Clock) {
     } yield t
 
     db.run(q.result.head).flatMap { t =>
-      if(TimeUtil.isBeforeToday(t.assignedAt)) {
+      if(TimeUtil.hoursSince(t.assignedAt) >= 24) {
         Future.failed(TimeForTaskAlreadyEndedException)
       } else {
         val completion = if (completed) Some(now) else None

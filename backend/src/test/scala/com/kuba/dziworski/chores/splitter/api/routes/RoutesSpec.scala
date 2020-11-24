@@ -164,7 +164,7 @@ class RoutesSpec extends WordSpec with Routes with Matchers with ScalatestRouteT
           completedAt = None)
       ))
     }
-    "return BadRequest if day when task was submitted ended" in {
+    "return BadRequest if more than 24 hours passed for a  when task was submitted ended" in {
       val andrew = addUser("andrew", "andrew@gmail.com")
       val sweep = addChore("sweep", 5, Some(3))
       val andrewSweepTask = addTask(andrew, sweep)
