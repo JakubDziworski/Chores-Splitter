@@ -68,7 +68,7 @@ class ChoresService(db: Database)(implicit clock: Clock) {
     val q = chores.filter(_.interval.isDefined).joinLeft(tasks).on((chore,t) => t.choreId === chore.choreId)
 
     def allTasksAreAfterInterval(interval:Int, tasksRows: Seq[TasksRow]) = {
-      tasksRows.forall(_.completedAt.forall(hoursSince(_) >= interval*24))
+      tasksRows.forall(_.completedAt.forall(daysSince(_) >= interval))
     }
 
     db.run(q.result)

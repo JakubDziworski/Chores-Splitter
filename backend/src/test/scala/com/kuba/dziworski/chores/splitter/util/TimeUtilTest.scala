@@ -13,11 +13,11 @@ class TimeUtilTest extends FunSuite with TestHelpers with Matchers {
   test("hours since") {
     val now = new DateTime(2017,12,25,5,30,0)
     setTime(now.getMillis)
-    TimeUtil.hoursSince(now.minusHours(1).getMillis) shouldBe 1
-    TimeUtil.hoursSince(now.minusHours(5).getMillis) shouldBe 5
-    TimeUtil.hoursSince(now.minusHours(5).minusMinutes(30).getMillis) shouldBe 5
-    TimeUtil.hoursSince(now.minusHours(5).minusMinutes(31).getMillis) shouldBe 5
-    TimeUtil.hoursSince(now.minusDays(1).getMillis) shouldBe 24
+    TimeUtil.daysSince(now.plusHours(18).getMillis) shouldBe 0
+    TimeUtil.daysSince(now.minusHours(6).getMillis) shouldBe 1
+    TimeUtil.daysSince(now.minusHours(29).getMillis) shouldBe 1
+    TimeUtil.daysSince(now.minusHours(30).getMillis) shouldBe 2
+    TimeUtil.daysSince(now.plusHours(19).getMillis) shouldBe -1
   }
 
   test("hour of day") {
